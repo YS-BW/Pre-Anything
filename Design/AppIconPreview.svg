@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1280" height="1280" viewBox="0 0 1280 1280">
+  <title>Pre-Anything app icon preview</title>
+  <desc>The charcoal area is a presentation canvas and is not part of the icon.</desc>
+  <defs>
+    <radialGradient id="canvas" cx="50%" cy="47%" r="72%">
+      <stop offset="0" stop-color="#444851"/>
+      <stop offset="0.58" stop-color="#373B44"/>
+      <stop offset="1" stop-color="#252932"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="1280" fill="url(#canvas)"/>
+  <image href="AppIcon.svg" xlink:href="AppIcon.svg" x="117" y="105" width="1024" height="1024"/>
+</svg>

@@ -1,5 +1,9 @@
 # Pre-Anything
 
+<p align="center">
+  <img src="Design/PreAnything-macOS27-Preview.png" width="220" alt="Pre-Anything app icon">
+</p>
+
 Native Quick Look previews for Markdown, JSON, and YAML on macOS 15 and later.
 
 - Markdown is rendered as a native readable document, including common Mermaid diagrams, LaTeX math, and syntax-highlighted fenced code.
