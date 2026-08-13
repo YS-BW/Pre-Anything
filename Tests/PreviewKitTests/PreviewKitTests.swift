@@ -4,6 +4,23 @@ import XCTest
 @testable import PreviewKit
 
 final class PreviewKitTests: XCTestCase {
+    func testAppearancePreferencesDefaultToTransparentAndRemainIndependent() throws {
+        let suiteName = "PreAnythingTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let preferences = PreviewAppearancePreferences(defaults: defaults)
+
+        for format in PreviewFormat.allCases {
+            XCTAssertTrue(preferences.isTransparent(for: format))
+        }
+
+        preferences.setTransparent(false, for: .json)
+
+        XCTAssertTrue(preferences.isTransparent(for: .markdown))
+        XCTAssertFalse(preferences.isTransparent(for: .json))
+        XCTAssertTrue(preferences.isTransparent(for: .yaml))
+    }
+
     func testJSONPreservesOrderDuplicatesAndNumberSpelling() throws {
         let source = #"{"z":1e+09,"a":900719925474099312345,"z":-0.50}"#
         let document = try prepare(source, format: .json)

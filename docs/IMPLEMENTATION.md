@@ -12,7 +12,7 @@ Pre-Anything.app
     └── YAML Preview.appex      → public.yaml
 ```
 
-All three extensions statically link `PreviewKit`. No shared writable state or App Group is required.
+All three extensions statically link `PreviewKit`. The containing App and extensions share only their per-format transparent-background booleans through `group.com.lixinlv.PreAnything`; file contents never enter the App Group.
 
 The public processing boundary is:
 
@@ -36,7 +36,7 @@ The service reads only the requested URL, applies size and encoding limits, perf
 
 Validated on 2026-08-13 with macOS 27 beta, Xcode 27 beta (27A5237l), and Swift 6.4:
 
-- Debug unit test suite: 14 tests passed.
+- Debug unit test suite: 15 tests passed, including independent per-format appearance preferences.
 - 1 MiB JSON processing baseline: approximately 0.24 seconds in the Debug test process.
 - Release build: succeeded using “Sign to Run Locally”.
 - Release app size after font pruning and hierarchy highlighting: approximately 39 MiB universal. Heavy native rendering dependencies are linked only into `Markdown Preview.appex`; JSON and YAML remain approximately 5.8 MiB each.

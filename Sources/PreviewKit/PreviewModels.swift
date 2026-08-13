@@ -1,6 +1,6 @@
 import Foundation
 
-public enum PreviewFormat: String, Sendable {
+public enum PreviewFormat: String, CaseIterable, Sendable {
     case markdown
     case json
     case yaml

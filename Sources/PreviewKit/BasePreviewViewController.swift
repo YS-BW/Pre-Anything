@@ -10,7 +10,9 @@ open class BasePreviewViewController: NSViewController, QLPreviewingController {
     private let previewView = NativePreviewView()
 
     open override func loadView() {
-        previewView.setBackgroundTransparent(true)
+        previewView.setBackgroundTransparent(
+            PreviewAppearancePreferences.shared.isTransparent(for: previewFormat)
+        )
         view = previewView
         preferredContentSize = NSSize(width: 900, height: 700)
     }
@@ -39,6 +41,7 @@ private final class NativePreviewView: NSView {
     private let diagnosticLabel = NSTextField(wrappingLabelWithString: "")
     private let scrollView = NSScrollView()
     private let textView = NSTextView()
+    private var isBackgroundTransparent = true
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -50,6 +53,7 @@ private final class NativePreviewView: NSView {
     }
 
     func setBackgroundTransparent(_ isTransparent: Bool) {
+        isBackgroundTransparent = isTransparent
         let backgroundColor: NSColor = isTransparent ? .clear : .textBackgroundColor
 
         layer?.backgroundColor = backgroundColor.cgColor
@@ -399,7 +403,7 @@ private final class NativePreviewView: NSView {
             cell.verticalAlignment = .middle
             cell.backgroundColor = isHeader
                 ? NSColor.textColor.withAlphaComponent(0.09)
-                : NSColor.textBackgroundColor
+                : (isBackgroundTransparent ? .clear : .textBackgroundColor)
             cell.setBorderColor(NSColor.separatorColor)
             cell.setWidth(8, type: .absolute, for: .padding)
             cell.setWidth(1, type: .absolute, for: .border)

@@ -1,13 +1,30 @@
 import AppKit
+import PreviewKit
 import SwiftUI
 
 struct ExtensionManagerView: View {
     private let formats = [
-        FormatSummary(icon: "text.document", name: "Markdown", detail: "Rendered document preview"),
-        FormatSummary(icon: "curlybraces", name: "JSON", detail: "Faithful formatting and syntax highlighting"),
-        FormatSummary(icon: "list.bullet.indent", name: "YAML", detail: "Original source with syntax highlighting"),
+        FormatSummary(
+            format: .markdown,
+            icon: "text.document",
+            name: "Markdown",
+            detail: "Rendered document preview"
+        ),
+        FormatSummary(
+            format: .json,
+            icon: "curlybraces",
+            name: "JSON",
+            detail: "Faithful formatting and syntax highlighting"
+        ),
+        FormatSummary(
+            format: .yaml,
+            icon: "list.bullet.indent",
+            name: "YAML",
+            detail: "Original source with syntax highlighting"
+        ),
     ]
 
+    @StateObject private var appearanceSettings = AppearanceSettings()
     @State private var showNavigationHelp = false
 
     var body: some View {
@@ -20,25 +37,44 @@ struct ExtensionManagerView: View {
                 Text("Pre-Anything")
                     .font(.largeTitle.weight(.semibold))
 
-                Text("Choose which native Quick Look previews macOS should use.")
+                Text("Configure the appearance of native Quick Look previews.")
                     .foregroundStyle(.secondary)
             }
 
-            VStack(spacing: 0) {
-                ForEach(formats) { format in
-                    HStack(spacing: 14) {
-                        Image(systemName: format.icon)
-                            .frame(width: 24)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Transparent Background")
+                            .font(.headline)
+                        Text("Finder's preview material remains visible behind the content.")
+                            .font(.callout)
                             .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(format.name).fontWeight(.medium)
-                            Text(format.detail)
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
                     }
+
+                    Spacer()
+
+                    Toggle("All Formats", isOn: allTransparentBinding)
+                        .toggleStyle(.switch)
+                }
+
+                Divider()
+
+                ForEach(formats) { format in
+                    Toggle(isOn: transparentBinding(for: format.format)) {
+                        HStack(spacing: 14) {
+                            Image(systemName: format.icon)
+                                .frame(width: 24)
+                                .foregroundStyle(.secondary)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(format.name).fontWeight(.medium)
+                                Text(format.detail)
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .toggleStyle(.switch)
                     .padding(.vertical, 12)
 
                     if format.id != formats.last?.id {
@@ -46,6 +82,9 @@ struct ExtensionManagerView: View {
                     }
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 12))
 
             Spacer(minLength: 8)
 
@@ -73,6 +112,24 @@ struct ExtensionManagerView: View {
         }
     }
 
+    private var allTransparentBinding: Binding<Bool> {
+        Binding(
+            get: { appearanceSettings.allTransparent },
+            set: { appearanceSettings.setAllTransparent($0) }
+        )
+    }
+
+    private func transparentBinding(for format: PreviewFormat) -> Binding<Bool> {
+        switch format {
+        case .markdown:
+            $appearanceSettings.markdownTransparent
+        case .json:
+            $appearanceSettings.jsonTransparent
+        case .yaml:
+            $appearanceSettings.yamlTransparent
+        }
+    }
+
     private func openExtensionSettings() {
         // macOS doesn't expose a public API for changing Quick Look activation.
         // This URL opens the public System Settings application at its extensions area when supported.
@@ -92,6 +149,7 @@ struct ExtensionManagerView: View {
 }
 
 private struct FormatSummary: Identifiable {
+    let format: PreviewFormat
     let icon: String
     let name: String
     let detail: String

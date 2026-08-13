@@ -6,7 +6,7 @@ Native Quick Look previews for Markdown, JSON, and YAML on macOS 15 and later.
 - JSON is faithfully formatted with matching rainbow delimiters and level-aware key colors, while values use the system text color.
 - YAML keeps the original source, comments, anchors, tags, and indentation while coloring keys by indentation hierarchy and leaving values neutral.
 
-Each format is a separate Quick Look extension, so macOS can enable or disable it independently. The containing App only lists the formats and opens the system extension management page. There are no preferences, background processes, network requests, or App Groups.
+Each format is a separate Quick Look extension, so macOS can enable or disable it independently. The containing App controls transparent backgrounds per format (or all at once) and opens the system extension management page. A single App Group shares that appearance preference with the extensions; there are no background processes or network requests.
 
 Markdown rendering remains AppKit/TextKit based: it does not use HTML, JavaScript, or `WKWebView`. Native Mermaid currently covers flowchart, sequence, state, class, ER, and XY diagrams. Unsupported diagrams and invalid math fall back to readable source text. Local and remote images remain placeholders.
 

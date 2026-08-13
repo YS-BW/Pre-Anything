@@ -11,7 +11,8 @@
 - 第一版不引入 `WKWebView` 或 Electron；保持扩展轻量、快速、可靠。
 - Markdown 使用原生阅读视图，并原生渲染常用 Mermaid、LaTeX 数学公式与常见代码语言高亮；JSON 使用保真格式化源码；YAML 使用原文高亮。
 - Markdown、JSON、YAML 分别作为独立 Quick Look 扩展，由 macOS 负责启停。
-- Containing App 只提供扩展说明与系统管理入口，不提供设置页、App Group 或预览偏好。
+- Containing App 提供扩展说明、系统管理入口，以及 Markdown、JSON、YAML 各自的透明背景开关；除此之外不扩展为通用设置中心。
+- App 与三个扩展通过 `group.com.lixinlv.PreAnything` App Group 共享这一项外观偏好。
 
 ## 产品边界（MVP）
 
