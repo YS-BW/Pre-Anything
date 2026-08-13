@@ -1,0 +1,219 @@
+name: PreAnything
+
+options:
+  bundleIdPrefix: com.lixinlv
+  deploymentTarget:
+    macOS: "15.0"
+  xcodeVersion: "27.0"
+  createIntermediateGroups: true
+
+configs:
+  Debug: debug
+  Release: release
+
+packages:
+  Markdown:
+    url: https://github.com/swiftlang/swift-markdown.git
+    exactVersion: 0.8.0
+  Yams:
+    url: https://github.com/jpsim/Yams.git
+    exactVersion: 6.2.2
+  SwiftMath:
+    url: https://github.com/mgriebling/SwiftMath.git
+    exactVersion: 1.7.3
+  BeautifulMermaid:
+    url: https://github.com/lukilabs/beautiful-mermaid-swift.git
+    exactVersion: 1.0.4
+
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    CLANG_ENABLE_MODULES: YES
+    CODE_SIGN_STYLE: Automatic
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+    Release:
+      SWIFT_COMPILATION_MODE: wholemodule
+
+targets:
+  PreviewKit:
+    type: library.static
+    platform: macOS
+    sources:
+      - Sources/PreviewKit
+    dependencies:
+      - package: Markdown
+      - package: Yams
+      - sdk: AppKit.framework
+      - sdk: Quartz.framework
+    settings:
+      base:
+        PRODUCT_NAME: PreviewKit
+        PRODUCT_MODULE_NAME: PreviewKit
+
+  PreAnything:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/PreAnything
+    configFiles:
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
+    info:
+      path: Sources/PreAnything/Info.plist
+      properties:
+        CFBundleDisplayName: Pre-Anything
+        CFBundleName: Pre-Anything
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "8"
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
+    entitlements:
+      path: Sources/PreAnything/PreAnything.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything
+        PRODUCT_NAME: Pre-Anything
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+    dependencies:
+      - target: MarkdownPreview
+        embed: true
+        codeSign: true
+      - target: JSONPreview
+        embed: true
+        codeSign: true
+      - target: YAMLPreview
+        embed: true
+        codeSign: true
+
+  MarkdownPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/MarkdownPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.MarkdownPreview
+        PRODUCT_NAME: Markdown Preview
+    info:
+      path: Sources/MarkdownPreview/Info.plist
+      properties:
+        CFBundleDisplayName: Markdown Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "8"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - net.daringfireball.markdown
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+    dependencies:
+      - package: SwiftMath
+      - package: BeautifulMermaid
+    postBuildScripts:
+      - name: Prune unused SwiftMath fonts
+        basedOnDependencyAnalysis: false
+        script: /bin/sh "$SRCROOT/Scripts/prune-swiftmath-fonts.sh"
+
+  JSONPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/JSONPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.JSONPreview
+        PRODUCT_NAME: JSON Preview
+    info:
+      path: Sources/JSONPreview/Info.plist
+      properties:
+        CFBundleDisplayName: JSON Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "8"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - public.json
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
+  YAMLPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/YAMLPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.YAMLPreview
+        PRODUCT_NAME: YAML Preview
+    info:
+      path: Sources/YAMLPreview/Info.plist
+      properties:
+        CFBundleDisplayName: YAML Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "8"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - public.yaml
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
+  PreviewKitTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/PreviewKitTests
+    dependencies:
+      - target: PreviewKit
+      - package: SwiftMath
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.PreviewKitTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+
+targetTemplates:
+  QuickLookExtension:
+    type: app-extension
+    platform: macOS
+    configFiles:
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
+    entitlements:
+      path: Config/QuickLook.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    settings:
+      base:
+        APPLICATION_EXTENSION_API_ONLY: YES
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+        ENABLE_HARDENED_RUNTIME: YES
+    dependencies:
+      - target: PreviewKit
+      - sdk: AppKit.framework
+      - sdk: Quartz.framework
+
+schemes:
+  PreAnything:
+    build:
+      targets:
+        PreAnything: all
+        PreviewKitTests: [test]
+    test:
+      targets:
+        - PreviewKitTests
+    run:
+      config: Debug
+    archive:
+      config: Release

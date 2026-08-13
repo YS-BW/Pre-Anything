@@ -1,0 +1,14 @@
+---
+defaults: &defaults
+  local: true
+  network: false # remote resources stay disabled
+
+markdown:
+  <<: *defaults
+  renderer: native
+json:
+  <<: *defaults
+  renderer: formatted-source
+yaml:
+  <<: *defaults
+  renderer: original-source

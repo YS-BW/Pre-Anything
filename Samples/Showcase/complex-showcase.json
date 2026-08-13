@@ -1,0 +1,201 @@
+{
+  "project": {
+    "name": "Pre-Anything",
+    "version": "0.1.0-alpha",
+    "bundleIdentifier": "com.lixinlv.PreAnything",
+    "platform": {
+      "name": "macOS",
+      "minimumVersion": "15.0",
+      "developmentVersion": "27 beta",
+      "architecture": [
+        "arm64",
+        "x86_64"
+      ]
+    }
+  },
+  "extensions": [
+    {
+      "id": "com.lixinlv.PreAnything.MarkdownPreview",
+      "format": "markdown",
+      "uti": "net.daringfireball.markdown",
+      "features": {
+        "headings": true,
+        "lists": {
+          "ordered": true,
+          "unordered": true,
+          "tasks": true,
+          "maximumDemonstratedDepth": 4
+        },
+        "tables": true,
+        "links": true,
+        "codeBlocks": [
+          "swift",
+          "json",
+          "yaml",
+          "bash",
+          "mermaid"
+        ],
+        "remoteImages": false,
+        "rawHTMLExecution": false
+      }
+    },
+    {
+      "id": "com.lixinlv.PreAnything.JSONPreview",
+      "format": "json",
+      "uti": "public.json",
+      "features": {
+        "indentationSpaces": 2,
+        "preserveKeyOrder": true,
+        "preserveDuplicateKeys": true,
+        "preserveRawNumbers": true,
+        "diagnostics": {
+          "line": true,
+          "column": true,
+          "sourceFallback": true
+        }
+      }
+    },
+    {
+      "id": "com.lixinlv.PreAnything.YAMLPreview",
+      "format": "yaml",
+      "uti": "public.yaml",
+      "features": {
+        "preserveOriginalSource": true,
+        "comments": true,
+        "anchors": true,
+        "aliases": true,
+        "tags": true,
+        "multiDocument": true
+      }
+    }
+  ],
+  "limits": {
+    "bytes": {
+      "fullProcessing": 5242880,
+      "boundedPreview": 26214400,
+      "mediumPrefix": 1048576,
+      "largePrefix": 262144
+    },
+    "json": {
+      "maximumDepth": 256,
+      "maximumTokens": 1000000
+    },
+    "acceptedEncodings": [
+      {
+        "name": "UTF-8",
+        "bom": false
+      },
+      {
+        "name": "UTF-8",
+        "bom": true
+      },
+      {
+        "name": "UTF-16LE",
+        "bom": true
+      },
+      {
+        "name": "UTF-16BE",
+        "bom": true
+      }
+    ]
+  },
+  "dataTypes": {
+    "nullValue": null,
+    "booleans": [
+      true,
+      false
+    ],
+    "integers": {
+      "zero": 0,
+      "negative": -42,
+      "veryLarge": 1234567890123456789012345678901234567890
+    },
+    "numbers": {
+      "decimal": 3.141592653589793238462643383279,
+      "smallExponent": 1.2345e-120,
+      "largeExponent": -9.87654321E+250,
+      "negativeZero": -0,
+      "trailingFraction": 100.0000
+    },
+    "strings": {
+      "chinese": "你好，Quick Look！",
+      "emoji": "🧭 🚀 ✨ 🧪",
+      "escaped": "first line\nsecond line\ttabbed\\path\"quoted\"",
+      "unicodeEscapes": "\u0050\u0072\u0065\u0041\u006e\u0079\u0074\u0068\u0069\u006e\u0067",
+      "url": "https://example.com/search?q=markdown%20preview&lang=zh-CN",
+      "empty": ""
+    }
+  },
+  "deeplyNested": {
+    "level01": {
+      "level02": {
+        "level03": {
+          "level04": {
+            "level05": {
+              "level06": {
+                "level07": {
+                  "level08": {
+                    "level09": {
+                      "level10": {
+                        "message": "If you can read this, nested formatting works.",
+                        "matrix": [
+                          [
+                            1,
+                            2,
+                            3
+                          ],
+                          [
+                            4,
+                            5,
+                            6
+                          ],
+                          [
+                            7,
+                            8,
+                            9
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "duplicateKeyDemo": {
+    "status": "first occurrence",
+    "status": "second occurrence must remain visible",
+    "status": "third occurrence must also remain visible"
+  },
+  "events": [
+    {
+      "timestamp": "2026-08-13T21:50:02.511+08:00",
+      "type": "test.completed",
+      "payload": {
+        "executed": 10,
+        "failures": 0,
+        "durationSeconds": 0.267
+      }
+    },
+    {
+      "timestamp": "2026-08-13T21:51:00.000+08:00",
+      "type": "extension.discovered",
+      "payload": {
+        "identifiers": [
+          "com.lixinlv.PreAnything.MarkdownPreview",
+          "com.lixinlv.PreAnything.JSONPreview",
+          "com.lixinlv.PreAnything.YAMLPreview"
+        ]
+      }
+    }
+  ],
+  "emptyContainers": {
+    "object": {},
+    "array": []
+  },
+  "finalMessage": "JSON formatting should preserve every key, token spelling, escape, and nesting level."
+}

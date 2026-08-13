@@ -1,0 +1,3 @@
+// Shared, non-secret signing defaults. Add DEVELOPMENT_TEAM to Local.xcconfig.
+CODE_SIGN_STYLE = Automatic
+#include? "Local.xcconfig"

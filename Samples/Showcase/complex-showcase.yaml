@@ -1,0 +1,226 @@
+---
+# Pre-Anything YAML Showcase
+# 这个文件重点验证：注释、缩进、锚点、别名、合并键、标签、块文本和多文档。
+
+product:
+  name: Pre-Anything
+  version: 0.1.0-alpha
+  bundle_identifier: com.lixinlv.PreAnything
+  platform:
+    name: macOS
+    minimum: "15.0"
+    development: "27 beta"
+  unicode: "你好，Quick Look！🧭"
+
+# 公共配置通过 anchor 定义，下面的 extension 使用 merge key 复用。
+defaults: &extension_defaults
+  sandbox: true
+  network: false
+  writable_files: false
+  display:
+    selectable: true
+    editable: false
+    follows_system_appearance: true
+
+extensions:
+  markdown:
+    <<: *extension_defaults
+    bundle_id: com.lixinlv.PreAnything.MarkdownPreview
+    uti: net.daringfireball.markdown
+    parser:
+      package: swift-markdown
+      version: 0.8.0
+    features:
+      - headings
+      - ordered lists
+      - unordered lists
+      - task items
+      - block quotes
+      - links
+      - fenced code
+      - tables
+      - strikethrough
+    security:
+      remote_images: disabled
+      raw_html: plain text
+
+  json:
+    <<: *extension_defaults
+    bundle_id: com.lixinlv.PreAnything.JSONPreview
+    uti: public.json
+    parser:
+      package: internal
+      indentation: 2
+      preserve:
+        - key order
+        - duplicate keys
+        - raw number spelling
+        - raw string tokens
+
+  yaml:
+    <<: *extension_defaults
+    bundle_id: com.lixinlv.PreAnything.YAMLPreview
+    uti: public.yaml
+    parser:
+      package: Yams
+      version: 6.2.2
+      mode: validate-only
+    preserve:
+      comments: true
+      indentation: true
+      anchors: true
+      aliases: true
+      tags: true
+      document_separators: true
+
+limits: &limits
+  full_processing: 5 MiB
+  medium:
+    range: 5–25 MiB
+    prefix: 1 MiB
+  large:
+    threshold: 25 MiB
+    prefix: 256 KiB
+  json:
+    maximum_depth: 256
+    maximum_tokens: 1_000_000
+
+encodings:
+  accepted:
+    - { name: UTF-8, bom: optional }
+    - { name: UTF-16LE, bom: required }
+    - { name: UTF-16BE, bom: required }
+  unknown_encoding: explicit-error
+
+numbers:
+  zero: 0
+  negative_zero: -0
+  integer: 42
+  very_large_integer: 1234567890123456789012345678901234567890
+  decimal: 3.141592653589793238462643383279
+  scientific_small: 1.2345e-120
+  scientific_large: -9.87654321e+250
+  hex_like_string: "0xFF"
+
+boolean_and_null_variants:
+  canonical_true: true
+  canonical_false: false
+  explicit_null: null
+  tilde_null: ~
+  looks_boolean_but_is_string: "yes"
+  looks_null_but_is_string: "null"
+
+flow_style:
+  object: { alpha: 1, beta: 2, nested: { enabled: true, labels: [a, b, c] } }
+  array: [one, two, { three: 3 }, [4, 5, 6]]
+
+quoted_strings:
+  plain: this is a plain scalar
+  single: 'Single quotes preserve backslashes: C:\Users\demo'
+  double: "Escapes are decoded by parsers: first\nsecond\t第三行"
+  colon_inside: "key: value"
+  hash_inside: "not # a comment"
+  empty_single: ''
+  empty_double: ""
+
+literal_block: |
+  第一行会保留换行。
+  第二行包含 Markdown：**not rendered here**。
+
+  空行也应保留。
+  最后一行之后保留一个换行。
+
+folded_block: >-
+  这是一个 folded scalar，连续的普通行
+  通常会在 YAML 语义中折叠为空格，
+  但 Pre-Anything 显示的必须仍然是原始源码。
+
+indented_block:
+  shell_script: |2-
+      # 只作为文本显示，绝不执行
+      xcodegen generate
+      xcodebuild -scheme PreAnything test
+
+anchors:
+  database: &database
+    host: localhost
+    port: 5432
+    credentials: &credentials
+      username: preview_user
+      password: "not-a-real-secret"
+  primary: *database
+  copied_credentials: *credentials
+
+environments:
+  base: &environment
+    retries: 3
+    timeout_seconds: 30
+    logging:
+      level: info
+      structured: true
+  development:
+    <<: *environment
+    debug: true
+    logging:
+      level: debug
+      structured: false
+  production:
+    <<: *environment
+    debug: false
+    retries: 5
+
+explicit_tags:
+  string_number: !!str 12345678901234567890
+  integer_value: !!int 42
+  floating_value: !!float 6.022e23
+  ordered_pairs: !!omap
+    - first: 1
+    - second: 2
+    - third: 3
+
+deeply_nested:
+  level_01:
+    level_02:
+      level_03:
+        level_04:
+          level_05:
+            level_06:
+              level_07:
+                level_08:
+                  level_09:
+                    level_10:
+                      message: Nested indentation remains readable.
+                      matrix:
+                        - [1, 2, 3]
+                        - [4, 5, 6]
+                        - [7, 8, 9]
+
+empty_values:
+  empty_mapping: {}
+  empty_sequence: []
+  empty_scalar:
+
+...
+---
+# 第二个 YAML document：验证多文档分隔符不会丢失。
+document:
+  index: 2
+  kind: validation-record
+  inherited_limits:
+    full_processing: 5 MiB
+    medium_prefix: 1 MiB
+    large_prefix: 256 KiB
+  tests:
+    total: 10
+    failures: 0
+    baseline:
+      fixture_size: 1 MiB
+      debug_duration_seconds: 0.241
+  messages:
+    - severity: info
+      text: "Markdown, JSON, and YAML extensions were discovered."
+    - severity: warning
+      text: "Mermaid and LaTeX are currently displayed as source text."
+    - severity: success
+      text: "Comments, anchors, tags, and separators remain visible."
+...
