@@ -24,6 +24,9 @@ packages:
   BeautifulMermaid:
     url: https://github.com/lukilabs/beautiful-mermaid-swift.git
     exactVersion: 1.0.4
+  TOMLKit:
+    url: https://github.com/LebJe/TOMLKit.git
+    exactVersion: 0.6.0
 
 settings:
   base:
@@ -69,7 +72,7 @@ targets:
         CFBundleDisplayName: Pre-Anything
         CFBundleName: Pre-Anything
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "13"
+        CFBundleVersion: "14"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
@@ -94,6 +97,42 @@ targets:
                 - cs
                 - pyi
                 - pyw
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.lixinlv.preanything.toml
+            UTTypeDescription: TOML Configuration
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [toml]
+          - UTTypeIdentifier: com.lixinlv.preanything.jsonc
+            UTTypeDescription: JSON with Comments
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [jsonc]
+          - UTTypeIdentifier: com.lixinlv.preanything.json5
+            UTTypeDescription: JSON5
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [json5]
+          - UTTypeIdentifier: com.lixinlv.preanything.dotenv
+            UTTypeDescription: Environment Configuration
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [env]
+          - UTTypeIdentifier: com.lixinlv.preanything.ini
+            UTTypeDescription: INI Configuration
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [ini, cfg]
+          - UTTypeIdentifier: com.lixinlv.preanything.properties
+            UTTypeDescription: Properties Configuration
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [properties, conf]
+          - UTTypeIdentifier: com.lixinlv.preanything.notebook
+            UTTypeDescription: Jupyter Notebook
+            UTTypeConformsTo: [public.json, public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [ipynb]
     entitlements:
       path: Sources/PreAnything/PreAnything.entitlements
       properties:
@@ -121,6 +160,18 @@ targets:
       - target: SourceCodePreview
         embed: true
         codeSign: true
+      - target: ConfigPreview
+        embed: true
+        codeSign: true
+      - target: TablePreview
+        embed: true
+        codeSign: true
+      - target: XMLPreview
+        embed: true
+        codeSign: true
+      - target: NotebookPreview
+        embed: true
+        codeSign: true
 
   MarkdownPreview:
     templates: [QuickLookExtension]
@@ -135,7 +186,7 @@ targets:
       properties:
         CFBundleDisplayName: Markdown Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "13"
+        CFBundleVersion: "14"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -166,7 +217,7 @@ targets:
       properties:
         CFBundleDisplayName: JSON Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "13"
+        CFBundleVersion: "14"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -190,7 +241,7 @@ targets:
       properties:
         CFBundleDisplayName: YAML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "13"
+        CFBundleVersion: "14"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -214,7 +265,7 @@ targets:
       properties:
         CFBundleDisplayName: Source Code Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "13"
+        CFBundleVersion: "14"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -247,6 +298,108 @@ targets:
             QLSupportsSearchableItems: false
             QLIsDataBasedPreview: false
 
+  ConfigPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/ConfigPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.ConfigPreview
+        PRODUCT_NAME: Config Preview
+    info:
+      path: Sources/ConfigPreview/Info.plist
+      properties:
+        CFBundleDisplayName: Config Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "14"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - com.lixinlv.preanything.toml
+              - com.lixinlv.preanything.jsonc
+              - com.lixinlv.preanything.json5
+              - com.lixinlv.preanything.dotenv
+              - com.lixinlv.preanything.ini
+              - com.lixinlv.preanything.properties
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+    dependencies:
+      - package: TOMLKit
+
+  TablePreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/TablePreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.TablePreview
+        PRODUCT_NAME: Table Preview
+    info:
+      path: Sources/TablePreview/Info.plist
+      properties:
+        CFBundleDisplayName: Table Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "14"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              - public.comma-separated-values-text
+              - public.tab-separated-values-text
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
+  XMLPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/XMLPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.XMLPreview
+        PRODUCT_NAME: XML Preview
+    info:
+      path: Sources/XMLPreview/Info.plist
+      properties:
+        CFBundleDisplayName: XML Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "14"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes: [public.xml]
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
+  NotebookPreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/NotebookPreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.NotebookPreview
+        PRODUCT_NAME: Notebook Preview
+    info:
+      path: Sources/NotebookPreview/Info.plist
+      properties:
+        CFBundleDisplayName: Notebook Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "14"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes: [com.lixinlv.preanything.notebook]
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
   PreviewKitTests:
     type: bundle.unit-test
     platform: macOS
@@ -255,6 +408,7 @@ targets:
     dependencies:
       - target: PreviewKit
       - package: SwiftMath
+      - package: TOMLKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.PreviewKitTests

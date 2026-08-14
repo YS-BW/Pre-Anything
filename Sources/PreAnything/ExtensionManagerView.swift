@@ -23,6 +23,30 @@ struct ExtensionManagerView: View {
             detail: "Original source with syntax highlighting"
         ),
         FormatSummary(
+            format: .config,
+            icon: "slider.horizontal.3",
+            name: "Config",
+            detail: "TOML, JSONC/JSON5, dotenv, INI, and properties"
+        ),
+        FormatSummary(
+            format: .table,
+            icon: "tablecells",
+            name: "Table",
+            detail: "CSV and TSV with a native header row"
+        ),
+        FormatSummary(
+            format: .xml,
+            icon: "chevron.left.forwardslash.chevron.right",
+            name: "XML",
+            detail: "Original XML with tag and attribute highlighting"
+        ),
+        FormatSummary(
+            format: .notebook,
+            icon: "rectangle.stack",
+            name: "Notebook",
+            detail: "Safe Jupyter cells, text output, and local images"
+        ),
+        FormatSummary(
             format: .sourceCode,
             icon: "chevron.left.forwardslash.chevron.right",
             name: "Source Code",
@@ -114,7 +138,7 @@ struct ExtensionManagerView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Open General → Login Items & Extensions → Quick Look to manage Markdown, JSON, YAML, and Source Code previews.")
+            Text("Open General → Login Items & Extensions → Quick Look to manage the eight Pre-Anything preview families.")
         }
     }
 
@@ -133,6 +157,14 @@ struct ExtensionManagerView: View {
             $appearanceSettings.jsonTransparent
         case .yaml:
             $appearanceSettings.yamlTransparent
+        case .config:
+            $appearanceSettings.configTransparent
+        case .table:
+            $appearanceSettings.tableTransparent
+        case .xml:
+            $appearanceSettings.xmlTransparent
+        case .notebook:
+            $appearanceSettings.notebookTransparent
         case .sourceCode:
             $appearanceSettings.sourceCodeTransparent
         }

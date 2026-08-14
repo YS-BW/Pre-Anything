@@ -4,6 +4,10 @@ public enum PreviewFormat: String, CaseIterable, Sendable {
     case markdown
     case json
     case yaml
+    case config
+    case table
+    case xml
+    case notebook
     case sourceCode
 }
 
@@ -35,6 +39,7 @@ public enum PreviewStyleRole: Sendable, Equatable {
     )
     case link(String?)
     case imagePlaceholder
+    case notebookImage(Data, mimeType: String)
     case key
     case string
     case number

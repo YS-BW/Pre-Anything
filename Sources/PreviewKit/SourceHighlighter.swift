@@ -17,6 +17,14 @@ enum SourceHighlighter {
             spans = YAMLSourceHighlighter.highlight(source)
         case .markdown:
             spans = []
+        case .config:
+            spans = ConfigSourceHighlighter.highlight(source, kind: .generic)
+        case .table:
+            spans = []
+        case .xml:
+            spans = XMLSourceHighlighter.highlight(source)
+        case .notebook:
+            spans = JSONFallbackHighlighter.highlight(source)
         case .sourceCode:
             spans = NativeCodeHighlighter.spans(
                 source: source,
@@ -35,7 +43,7 @@ enum SourceHighlighter {
     }
 }
 
-private enum JSONFallbackHighlighter {
+enum JSONFallbackHighlighter {
     static func highlight(_ source: String) -> [PreviewStyleSpan] {
         let nsSource = source as NSString
         var spans: [PreviewStyleSpan] = []

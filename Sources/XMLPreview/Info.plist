@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Markdown Preview</string>
+	<string>XML Preview</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,7 +28,7 @@
 			<false/>
 			<key>QLSupportedContentTypes</key>
 			<array>
-				<string>net.daringfireball.markdown</string>
+				<string>public.xml</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>

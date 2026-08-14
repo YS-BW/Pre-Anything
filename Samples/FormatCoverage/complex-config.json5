@@ -1,0 +1,10 @@
+// JSON5 configuration keeps comments and source spelling.
+{
+  app: 'Pre-Anything',
+  enabled: true,
+  limits: {
+    fullMiB: 5,
+    previewMiB: 25,
+  },
+  formats: ['markdown', 'json', 'yaml',],
+}

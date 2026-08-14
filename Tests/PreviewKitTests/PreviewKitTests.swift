@@ -1,5 +1,6 @@
 import Foundation
 import SwiftMath
+import TOMLKit
 import XCTest
 @testable import PreviewKit
 
@@ -19,6 +20,10 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertTrue(preferences.isTransparent(for: .markdown))
         XCTAssertFalse(preferences.isTransparent(for: .json))
         XCTAssertTrue(preferences.isTransparent(for: .yaml))
+        XCTAssertTrue(preferences.isTransparent(for: .config))
+        XCTAssertTrue(preferences.isTransparent(for: .table))
+        XCTAssertTrue(preferences.isTransparent(for: .xml))
+        XCTAssertTrue(preferences.isTransparent(for: .notebook))
         XCTAssertTrue(preferences.isTransparent(for: .sourceCode))
     }
 
@@ -456,6 +461,159 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertLessThan(elapsed, .seconds(2), "Debug safety ceiling exceeded; release target remains 300 ms.")
     }
 
+    func testTOMLPreservesSourceAndHighlightsTablesKeysAndComments() throws {
+        let source = """
+        # retained comment
+        [server.tls]
+        enabled = true
+        issued = 2026-08-14T12:34:56Z
+        [[products]]
+        name = "widget"
+        """
+        XCTAssertNoThrow(try TOMLTable(string: source))
+
+        let spans = ConfigSourceHighlighter.highlight(source, kind: .toml)
+        let content = source as NSString
+        XCTAssertTrue(spans.contains { $0.role == .comment })
+        XCTAssertTrue(spans.contains { span in
+            content.substring(with: NSRange(location: span.location, length: span.length)) == "enabled"
+                && span.role == .hierarchy(level: 1, style: .key)
+        })
+        XCTAssertTrue(spans.contains { $0.role == .hierarchy(level: 1, style: .delimiter) })
+    }
+
+    func testJSON5AcceptsCommentsTrailingCommasAndBareKeys() throws {
+        let source = """
+        {
+          // preserved comment
+          bareKey: 'value',
+          trailing: [1, 2,],
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.allowsJSON5 = true
+        let decoded = try decoder.decode(JSON5Fixture.self, from: Data(source.utf8))
+        XCTAssertEqual(decoded.bareKey, "value")
+        XCTAssertEqual(decoded.trailing, [1, 2])
+
+        let spans = ConfigSourceHighlighter.highlight(source, kind: .json5)
+        XCTAssertTrue(spans.contains { $0.role == .comment })
+        XCTAssertTrue(spans.contains { span in
+            let text = (source as NSString).substring(with: NSRange(location: span.location, length: span.length))
+            return text == "bareKey" && span.role == .hierarchy(level: 1, style: .key)
+        })
+    }
+
+    func testConfigLineFormatsPreserveValuesAndColorOnlyStructure() {
+        let source = """
+        # comment
+        EMPTY=
+        TOKEN=${DO_NOT_EXPAND}
+        [service]
+        port: 8080
+        """
+        let spans = ConfigSourceHighlighter.highlight(source, kind: .dotenv)
+        XCTAssertTrue(spans.contains { $0.role == .comment })
+        XCTAssertTrue(spans.contains { $0.role == .hierarchy(level: 0, style: .key) })
+        XCTAssertFalse(spans.contains { $0.role == .string || $0.role == .number })
+    }
+
+    func testTableParserHandlesQuotedNewlinesEscapesAndTruncation() throws {
+        let table = try TableParser.parse(
+            "name,notes,empty\nAda,\"first line\nsecond \"\"quote\"\"\",\n",
+            delimiter: ","
+        )
+        XCTAssertEqual(table.headers, ["name", "notes", "empty"])
+        XCTAssertEqual(table.rows, [["Ada", "first line\nsecond \"quote\"", ""]])
+
+        let manyColumns = (0..<51).map(String.init).joined(separator: ",")
+        XCTAssertTrue(try TableParser.parse(manyColumns, delimiter: ",").isTruncated)
+    }
+
+    func testTablePreviewLoadsUTF16() throws {
+        let url = temporaryURL(extension: "tsv")
+        defer { try? FileManager.default.removeItem(at: url) }
+        var data = Data([0xFF, 0xFE])
+        data.append("name\tage\nAda\t42\n".data(using: .utf16LittleEndian)!)
+        try data.write(to: url)
+
+        let document = TablePreviewService.prepareSynchronously(url: url, delimiter: "\t")
+        XCTAssertTrue(document.isTable)
+        XCTAssertEqual(document.headers, ["name", "age"])
+        XCTAssertEqual(document.rows, [["Ada", "42"]])
+    }
+
+    func testXMLPreservesSourceHighlightsMarkupAndReportsErrors() throws {
+        let source = """
+        <!-- keep -->
+        <root mode="safe"><child><![CDATA[raw <text>]]>&amp;</child></root>
+        """
+        let document = try prepare(source, format: .xml, pathExtension: "xml")
+        XCTAssertEqual(document.content, source)
+        XCTAssertNil(document.diagnostic)
+        XCTAssertTrue(document.spans.contains { $0.role == .comment })
+        XCTAssertTrue(document.spans.contains { $0.role == .attribute })
+        XCTAssertTrue(document.spans.contains { $0.role == .string })
+        XCTAssertFalse(document.spans.contains { span in
+            let text = (document.content as NSString).substring(with: NSRange(location: span.location, length: span.length))
+            return text == "text" && span.role == .keyword
+        })
+
+        let invalid = try prepare("<root><child></root>", format: .xml, pathExtension: "xml")
+        XCTAssertEqual(invalid.diagnostic?.severity, .error)
+        XCTAssertNotNil(invalid.diagnostic?.line)
+        XCTAssertNotNil(invalid.diagnostic?.column)
+    }
+
+    func testNotebookRendersSafeCellsAndOmitsUnsafeOutput() throws {
+        let source = #"""
+        {
+          "metadata": {"language_info": {"name": "python"}},
+          "cells": [
+            {"cell_type": "markdown", "source": ["# Heading\\n", "**safe**"]},
+            {"cell_type": "code", "source": "print('hello')", "outputs": [
+              {"output_type": "stream", "text": "hello\\n"},
+              {"output_type": "display_data", "data": {"text/plain": "42", "image/png": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLmtAAAAABJRU5ErkJggg==", "text/html": "<button>no</button>"}}
+            ]}
+          ]
+        }
+        """#
+        let document = try prepare(source, format: .notebook, pathExtension: "ipynb")
+        XCTAssertNil(document.diagnostic)
+        XCTAssertTrue(document.content.contains("Heading"))
+        XCTAssertTrue(document.content.contains("print('hello')"))
+        XCTAssertTrue(document.content.contains("HTML, JavaScript, and SVG output were omitted for safety."))
+        XCTAssertTrue(document.spans.contains { $0.role == .codeBlock })
+        XCTAssertTrue(document.spans.contains { $0.role == .heading(5) })
+        XCTAssertTrue(document.spans.contains {
+            if case .notebookImage = $0.role { return true }
+            return false
+        })
+    }
+
+    func testNotebookInvalidJSONFallsBackToOriginalJSON() throws {
+        let source = #"{"cells": [}"#
+        let document = try prepare(source, format: .notebook, pathExtension: "ipynb")
+        XCTAssertEqual(document.content, source)
+        XCTAssertEqual(document.diagnostic?.severity, .error)
+    }
+
+    func testNewExtensionTargetsRegisterExpectedUTIs() throws {
+        let expected: [String: Set<String>] = [
+            "ConfigPreview": [
+                "com.lixinlv.preanything.toml", "com.lixinlv.preanything.jsonc",
+                "com.lixinlv.preanything.json5", "com.lixinlv.preanything.dotenv",
+                "com.lixinlv.preanything.ini", "com.lixinlv.preanything.properties",
+            ],
+            "TablePreview": ["public.comma-separated-values-text", "public.tab-separated-values-text"],
+            "XMLPreview": ["public.xml"],
+            "NotebookPreview": ["com.lixinlv.preanything.notebook"],
+        ]
+        for (target, types) in expected {
+            XCTAssertEqual(try extensionSupportedTypes(named: target), types)
+        }
+    }
+
     private func prepare(
         _ source: String,
         format: PreviewFormat,
@@ -483,4 +641,24 @@ final class PreviewKitTests: XCTestCase {
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension(pathExtension)
     }
+
+    private func extensionSupportedTypes(named target: String) throws -> Set<String> {
+        let repositoryRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let infoURL = repositoryRoot.appendingPathComponent("Sources/\(target)/Info.plist")
+        let data = try Data(contentsOf: infoURL)
+        let root = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        )
+        let extensionInfo = try XCTUnwrap(root["NSExtension"] as? [String: Any])
+        let attributes = try XCTUnwrap(extensionInfo["NSExtensionAttributes"] as? [String: Any])
+        return Set(try XCTUnwrap(attributes["QLSupportedContentTypes"] as? [String]))
+    }
+}
+
+private struct JSON5Fixture: Decodable {
+    let bareKey: String
+    let trailing: [Int]
 }

@@ -44,4 +44,24 @@ public enum SourceLanguage: String, CaseIterable, Sendable {
         default: .plainText
         }
     }
+
+    public static func language(forName name: String) -> SourceLanguage {
+        switch name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) {
+        case "python", "ipython": .python
+        case "swift": .swift
+        case "javascript", "node", "nodejs": .javascript
+        case "typescript": .typescript
+        case "java": .java
+        case "kotlin": .kotlin
+        case "go", "golang": .go
+        case "rust": .rust
+        case "ruby": .ruby
+        case "shell", "bash", "zsh", "sh": .shell
+        case "sql": .sql
+        case "c": .c
+        case "c++", "cpp": .cpp
+        case "c#", "csharp": .csharp
+        default: .plainText
+        }
+    }
 }

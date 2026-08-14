@@ -53,7 +53,7 @@ Pre-Anything 的定位不是 IDE 或完整源码浏览器，也不是以格式�
 
 - 经常在 Finder 中浏览项目、下载目录和构建产物的开发者。
 - 需要快速检查配置文件，但不希望打断当前工作流的人。
-- 阅读 AI、自动化工具或同事生成的 Markdown、JSON、YAML 和源码文件的人。
+- 阅读 AI、自动化工具或同事生成的 Markdown、JSON、YAML、配置、表格、XML、Notebook 和源码文件的人。
 - 在代码审查、演示或屏幕共享前，需要快速确认文件内容的人。
 
 ### 4.2 核心任务
@@ -90,6 +90,10 @@ Quick Look 不是编辑器，也不需要在多种视图间切换。每种格式
 - Markdown 直接渲染为阅读视图。
 - JSON 在解析成功后按两个空格格式化并高亮，但必须保留键顺序、重复键和数字原始写法。
 - YAML 保留原始源码、换行、缩进和注释，只增加高亮。
+- Config 保留原始配置源码，只以层级与语法颜色协助阅读。
+- Table 将 CSV / TSV 呈现为有界、可选择和复制的原生表格，首行固定为表头。
+- XML 保留原始源码并验证良构性。
+- Notebook 将安全的静态单元内容呈现为纵向文档流。
 - Source Code 保留原始字符和换行，只增加有界的词法高亮、行号和长行横向滚动。
 - 解析失败不得隐藏原始内容；产品不得静默排序、转换数值或遗漏数据。
 
@@ -164,9 +168,9 @@ Quick Look 属于系统工作流，产品不应抢夺注意力。
 Containing App 只承担扩展安装、外观偏好与管理入口职责：
 
 1. 说明 Pre-Anything 的用途。
-2. 列出 Markdown、JSON、YAML、Source Code 四个独立扩展。
+2. 列出 Markdown、JSON、YAML、Config、Table、XML、Notebook、Source Code 八个独立扩展。
 3. 引导用户进入 macOS 系统设置启用或停用各格式扩展。
-4. 分别设置 Markdown、JSON、YAML、Source Code 是否使用透明背景，并可一次应用到全部格式。
+4. 分别设置八个预览族是否使用透明背景，并可一次应用到全部格式。
 
 用户不需要保持 App 或菜单栏进程运行。透明背景是唯一的预览偏好，由 App Group 持久化并供扩展按启动时读取。
 
@@ -192,6 +196,10 @@ Finder 选中文件 → 按空格 → 理解内容 → 关闭或打开专门应�
 | Markdown | 原生渲染阅读视图 |
 | JSON | 两空格格式化源码与高亮；失败时原文与错误位置 |
 | YAML | 未修改的原始源码与高亮 |
+| Config | 未修改的 TOML / JSONC / JSON5 / 键值配置源码与高亮 |
+| Table | CSV / TSV 原生表格；首行为表头 |
+| XML | 未修改的 XML 源码与良构性诊断 |
+| Notebook | 安全的 Jupyter Markdown、代码、文本与内嵌位图输出 |
 | Source Code | 未修改的原始源码、原生词法高亮、行号与横向滚动 |
 | JSONL / NDJSON | 有界的记录流 |
 | TOML | 格式感知的源码高亮 |
@@ -268,12 +276,13 @@ Source Code 的目标是“按下空格即可可靠看懂一段实现，不必�
 
 是否新增语言应依据常见程度、UTI 可路由性和词法维护成本，而不是追求后缀数量。
 
-### 7.5 后续结构化格式
+### 7.5 Config、Table、XML 与 Notebook
 
-- JSONL / NDJSON 应按记录流式处理并限制展示数量。
-- TOML 应正确处理日期、特殊浮点值、数组表和点分键。
-- CSV / TSV 应正确处理引号、换行字段、编码和不规则行。
-- Property List 应同时处理 XML 与二进制形式，但不得与系统已有优秀预览无意义竞争。
+- Config 覆盖 TOML、JSONC、JSON5、`.env`、INI、`.properties`、`.conf`；不展开变量、不重新序列化、不删除注释。TOML 必须验证日期、数组表和点分键；JSONC/JSON5 必须允许其标准注释与扩展写法。
+- CSV / TSV 必须支持引号、转义引号、空单元格、引号内换行和 UTF-16；首行固定作为表头，完整预览最多 500 行数据、50 列，并明确显示截断提示。
+- XML 必须只显示原始源码，突出标签、属性、属性值、CDATA、注释和实体；无效嵌套必须给出行列诊断。
+- Notebook 是安全静态富预览：只处理 Markdown、代码、文本输出和文件内 base64 PNG/JPEG。不得执行代码、HTML、JavaScript、SVG、外链或交互控件；最多 200 个单元、单张图 2 MiB、所有图共 8 MiB。
+- JSONL / NDJSON 仍应按记录流式处理并限制展示数量。Property List 应同时处理 XML 与二进制形式，但不得与系统已有优秀预览无意义竞争。
 
 ## 8. 语义预览
 
@@ -423,7 +432,7 @@ App 的存在是现代 macOS 打包和分发 Quick Look 扩展的要求。它不
 技术实现可以演进，但必须保护以下产品属性：
 
 - 使用现代 Quick Look Preview Extension，不使用旧式 `.qlgenerator`。
-- Markdown、JSON、YAML、Source Code 分别使用独立扩展，使用户可以在 macOS 中真实启停单个预览族，并允许其他扩展接管；Source Code 内的语言共享一个扩展。
+- Markdown、JSON、YAML、Config、Table、XML、Notebook、Source Code 分别使用独立扩展，使用户可以在 macOS 中真实启停单个预览族，并允许其他扩展接管；Source Code 内的语言共享一个扩展。
 - 共享的 PreviewKit 负责读取、识别、解析、限制与渲染模型，并静态链接进各扩展。
 - Containing App 使用 SwiftUI；扩展使用原生 AppKit 视图型预览。
 - 不引入 HTML、WKWebView 或 Web 渲染管线。
@@ -437,10 +446,10 @@ App 的存在是现代 macOS 打包和分发 Quick Look 扩展的要求。它不
 
 ### 阶段一：建立信任
 
-- Markdown、JSON、YAML、Source Code。
-- Markdown 原生阅读、JSON 格式化高亮、YAML 原文高亮、常见源码原文高亮与行号。
+- Markdown、JSON、YAML、Config、Table、XML、Notebook、Source Code。
+- Markdown 原生阅读、JSON 格式化高亮、YAML / Config / XML 原文高亮、CSV / TSV 表格、Notebook 安全静态富预览、常见源码原文高亮与行号。
 - 深浅色、错误提示、编码处理和大文件降级。
-- 四个预览扩展可在 macOS 中独立启停。
+- 八个预览扩展可在 macOS 中独立启停。
 
 ### 阶段二：扩展日常数据格式
 

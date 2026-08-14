@@ -40,6 +40,28 @@ public enum PreviewService {
                     source: loaded.text,
                     byteCount: loaded.byteCount
                 )
+            case .config:
+                return SourceHighlighter.document(
+                    format: .config,
+                    source: loaded.text,
+                    byteCount: loaded.byteCount
+                )
+            case .table:
+                return SourceHighlighter.document(
+                    format: .table,
+                    source: loaded.text,
+                    byteCount: loaded.byteCount
+                )
+            case .xml:
+                return XMLPreviewRenderer.render(
+                    source: loaded.text,
+                    byteCount: loaded.byteCount
+                )
+            case .notebook:
+                return NotebookPreviewRenderer.render(
+                    source: loaded.text,
+                    byteCount: loaded.byteCount
+                )
             case .sourceCode:
                 return SourceCodePreviewRenderer.render(
                     source: loaded.text,

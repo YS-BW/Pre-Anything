@@ -18,8 +18,12 @@ open class BasePreviewViewController: NSViewController, QLPreviewingController {
         preferredContentSize = NSSize(width: 900, height: 700)
     }
 
+    open func prepareDocument(at url: URL) async -> PreviewDocument {
+        await PreviewService.prepare(url: url, as: previewFormat)
+    }
+
     public func preparePreviewOfFile(at url: URL) async throws {
-        let document = await PreviewService.prepare(url: url, as: previewFormat)
+        let document = await prepareDocument(at: url)
         previewView.render(document) { [weak self] attributed in
             self?.finalizeAttributedString(attributed, for: document)
         }
@@ -193,13 +197,13 @@ private final class NativePreviewView: NSView {
     }
 
     private func makeAttributedString(for document: PreviewDocument) -> NSMutableAttributedString {
-        let baseFont: NSFont = document.format == .markdown
+        let baseFont: NSFont = document.format == .markdown || document.format == .notebook
             ? .systemFont(ofSize: 15)
             : .monospacedSystemFont(ofSize: 13, weight: .regular)
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = document.format == .markdown ? 3 : 1
-        paragraphStyle.paragraphSpacing = document.format == .markdown ? 7 : 0
+        paragraphStyle.lineSpacing = document.format == .markdown || document.format == .notebook ? 3 : 1
+        paragraphStyle.paragraphSpacing = document.format == .markdown || document.format == .notebook ? 7 : 0
         paragraphStyle.lineBreakMode = document.format == .sourceCode
             ? .byClipping
             : .byWordWrapping
@@ -312,6 +316,8 @@ private final class NativePreviewView: NSView {
                 .foregroundColor: NSColor.secondaryLabelColor,
                 .font: NSFont.systemFont(ofSize: baseFont.pointSize, weight: .medium),
             ], range: range)
+        case .notebookImage:
+            break
         case .key:
             attributed.addAttribute(.foregroundColor, value: NSColor.systemBlue, range: range)
         case .string:

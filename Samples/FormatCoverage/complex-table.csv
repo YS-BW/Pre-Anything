@@ -1,0 +1,4 @@
+id,name,notes,empty
+1,Ada,"First line
+second line with a ""quoted"" word",
+2,李雷,"Unicode, commas, and a trailing value",ready

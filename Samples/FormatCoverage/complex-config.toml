@@ -1,0 +1,16 @@
+# Configuration preview coverage
+title = "Pre-Anything"
+issued = 2026-08-14T12:34:56Z
+features = ["markdown", "json5", "tables"]
+
+[server.tls]
+enabled = true
+ports = [443, 8443]
+
+[[services]]
+name = "preview"
+replicas = 2
+
+[[services]]
+name = "worker"
+replicas = 4
