@@ -11,11 +11,22 @@ Native Quick Look previews for Markdown, JSON, YAML, and source code on macOS 15
 - YAML keeps the original source, comments, anchors, tags, and indentation while coloring keys by indentation hierarchy and leaving values neutral.
 - Source code keeps every character unchanged while adding native syntax colors, line numbers, selection/copy, and horizontal scrolling. The first language set covers Swift, Objective-C, C/C++, C#, Java, JavaScript/TypeScript, Kotlin, Go, Rust, Python, Ruby, Shell, SQL, and CSS.
 
-Markdown, JSON, YAML, and Source Code are separate Quick Look extensions, so macOS can enable or disable each preview family independently. The containing App controls transparent backgrounds per family (or all at once) and opens the system extension management page. A single App Group shares that appearance preference with the extensions; there are no background processes or network requests.
+Markdown, JSON, YAML, and Source Code are separate Quick Look extensions, so macOS can enable or disable each preview family independently. The containing App controls transparent backgrounds per family (or all at once) and opens the system extension management page. A macOS Team-ID App Group shares that appearance preference with the extensions; there are no background processes or network requests.
 
 Markdown rendering remains AppKit/TextKit based: it does not use HTML, JavaScript, or `WKWebView`. Native Mermaid currently covers flowchart, sequence, state, class, ER, and XY diagrams. Unsupported diagrams and invalid math fall back to readable source text. Local and remote images remain placeholders.
 
 Source previews use the same bounded native lexer as fenced Markdown code. They do not launch an interpreter, compiler, language server, subprocess, or network request. Languages are grouped into one Source Code switch rather than creating a system extension entry for every suffix.
+
+## Install a GitHub development build
+
+GitHub development builds are signed with an Apple Development certificate, but are not notarized. Download only from this repository's Releases page, drag `Pre-Anything.app` into `Applications`, then remove the download quarantine recursively so macOS can load the containing app and all four embedded Quick Look extensions:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/Pre-Anything.app"
+open "/Applications/Pre-Anything.app"
+```
+
+After the App opens once, enable the formats you want in **System Settings → General → Login Items & Extensions → Quick Look**. There is one switch each for Markdown, JSON, YAML, and Source Code. This is an experimental distribution path: a notarized Developer ID build is required for a normal no-command installation experience.
 
 ## Development
 
@@ -39,10 +50,17 @@ xcodebuild \
   -project PreAnything.xcodeproj \
   -scheme PreAnything \
   -derivedDataPath DerivedData \
-  CODE_SIGNING_ALLOWED=NO \
   test
 ```
 
 For local Finder testing, build the `PreAnything` scheme normally. Xcode can use “Sign to Run Locally”; a Personal Team can be supplied in `Config/Local.xcconfig` when needed. Copy the resulting `Pre-Anything.app` into `~/Applications` or `/Applications`, then launch it once so macOS discovers its extensions.
+
+To create a GitHub development DMG, keep `Config/Local.xcconfig` configured with an Apple Development Team ID and run:
+
+```sh
+Scripts/package-development-dmg.sh
+```
+
+The script verifies every nested extension remains signed and fails if a provisioning profile is embedded. It intentionally does not notarize the result.
 
 Product direction and non-negotiable behavior are documented in [docs/PRODUCT_DESIGN.md](docs/PRODUCT_DESIGN.md).

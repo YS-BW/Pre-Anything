@@ -429,7 +429,7 @@ App 的存在是现代 macOS 打包和分发 Quick Look 扩展的要求。它不
 - 不引入 HTML、WKWebView 或 Web 渲染管线。
 - 不依赖 Electron、Node 或外部运行时。
 - 不为基础功能引入 XPC 服务或非沙盒辅助进程。
-- 仅使用 `group.com.lixinlv.PreAnything` App Group 同步四类预览的透明背景偏好，不承载文件内容或其他共享状态。
+- 仅使用签名 Team 派生的 `<TeamID>.com.lixinlv.PreAnything` macOS App Group 同步四类预览的透明背景偏好，不承载文件内容或其他共享状态；不得使用需要 provisioning profile 的 `group.` 前缀。
 - UTI 必须显式、精确注册，不得笼统抢占 `public.text` 或 `public.data`。
 - 第三方依赖必须固定版本、检查许可，并可在扩展沙盒内确定性运行。
 

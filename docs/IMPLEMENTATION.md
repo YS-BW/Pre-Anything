@@ -15,7 +15,7 @@ Pre-Anything.app
           public.css, com.lixinlv.preanything.source-code
 ```
 
-All four extensions statically link `PreviewKit`. The containing App and extensions share only their per-format transparent-background booleans through `group.com.lixinlv.PreAnything`; file contents never enter the App Group.
+All four extensions statically link `PreviewKit`. The containing App and extensions share only their per-format transparent-background booleans through the signing-team-derived macOS App Group `<TeamID>.com.lixinlv.PreAnything`; file contents never enter the App Group. This avoids embedding a provisioning profile in a development-signed GitHub build.
 
 The public processing boundary is:
 

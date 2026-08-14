@@ -1,3 +1,9 @@
 // Shared, non-secret signing defaults. Add DEVELOPMENT_TEAM to Local.xcconfig.
 CODE_SIGN_STYLE = Automatic
 #include? "Local.xcconfig"
+
+// macOS supports a Team-ID-prefixed App Group without embedding a provisioning
+// profile. Keeping this value derived from the active signing team lets the
+// containing App and each Quick Look extension share appearance preferences
+// while remaining suitable for development-signed GitHub builds.
+PREANYTHING_APP_GROUP_IDENTIFIER = $(DEVELOPMENT_TEAM).com.lixinlv.PreAnything

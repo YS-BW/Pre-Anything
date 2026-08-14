@@ -69,9 +69,10 @@ targets:
         CFBundleDisplayName: Pre-Anything
         CFBundleName: Pre-Anything
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "12"
+        CFBundleVersion: "13"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.lixinlv.preanything.source-code
             UTTypeDescription: Pre-Anything Source Code
@@ -98,7 +99,7 @@ targets:
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
-          - group.com.lixinlv.PreAnything
+          - $(PREANYTHING_APP_GROUP_IDENTIFIER)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything
@@ -134,7 +135,8 @@ targets:
       properties:
         CFBundleDisplayName: Markdown Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "12"
+        CFBundleVersion: "13"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -164,7 +166,8 @@ targets:
       properties:
         CFBundleDisplayName: JSON Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "12"
+        CFBundleVersion: "13"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -187,7 +190,8 @@ targets:
       properties:
         CFBundleDisplayName: YAML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "12"
+        CFBundleVersion: "13"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -210,7 +214,8 @@ targets:
       properties:
         CFBundleDisplayName: Source Code Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "12"
+        CFBundleVersion: "13"
+        PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -268,7 +273,7 @@ targetTemplates:
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
-          - group.com.lixinlv.PreAnything
+          - $(PREANYTHING_APP_GROUP_IDENTIFIER)
     settings:
       base:
         APPLICATION_EXTENSION_API_ONLY: YES

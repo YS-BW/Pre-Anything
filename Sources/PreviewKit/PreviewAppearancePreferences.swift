@@ -6,10 +6,22 @@ import Foundation
 /// background behavior for existing installs and for previews created before the App
 /// has ever been launched.
 public struct PreviewAppearancePreferences: @unchecked Sendable {
-    public static let appGroupIdentifier = "group.com.lixinlv.PreAnything"
+    private static let appGroupInfoKey = "PreAnythingAppGroupIdentifier"
+
+    /// The identifier is injected into every bundle's Info.plist from the
+    /// current signing team's build settings. A Team-ID-prefixed group works
+    /// on macOS without an embedded provisioning profile.
+    public static var appGroupIdentifier: String? {
+        guard let identifier = Bundle.main.object(forInfoDictionaryKey: appGroupInfoKey) as? String,
+              !identifier.isEmpty,
+              !identifier.contains("$(") else {
+            return nil
+        }
+        return identifier
+    }
 
     public static var shared: PreviewAppearancePreferences {
-        let defaults = UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+        let defaults = appGroupIdentifier.flatMap(UserDefaults.init(suiteName:)) ?? .standard
         return PreviewAppearancePreferences(defaults: defaults)
     }
 

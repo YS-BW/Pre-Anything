@@ -12,7 +12,7 @@
 - Markdown 使用原生阅读视图，并原生渲染常用 Mermaid、LaTeX 数学公式与常见代码语言高亮；JSON 使用保真格式化源码；YAML 使用原文高亮；Source Code 保留原文并提供原生高亮、行号和横向滚动。
 - Markdown、JSON、YAML 和 Source Code 分别作为独立 Quick Look 扩展，由 macOS 负责启停；不同编程语言统一归入一个 Source Code 扩展，避免系统设置中出现大量开关。
 - Containing App 提供扩展说明、系统管理入口，以及四类预览各自的透明背景开关；除此之外不扩展为通用设置中心。
-- App 与四个扩展通过 `group.com.lixinlv.PreAnything` App Group 共享这一项外观偏好。
+- App 与四个扩展通过由签名 Team 派生的 macOS App Group（`<TeamID>.com.lixinlv.PreAnything`）共享这一项外观偏好；不得改回需要 provisioning profile 的 `group.` 前缀。
 
 ## 产品边界（MVP）
 
