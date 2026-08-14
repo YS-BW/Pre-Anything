@@ -1,6 +1,6 @@
 # Pre-Anything 项目说明
 
-这是一个 macOS Quick Look 扩展项目，用于在 Finder 中预览开发者常用的文本文件，第一阶段支持 Markdown、JSON 和 YAML。
+这是一个 macOS Quick Look 扩展项目，用于在 Finder 中预览开发者常用的文本文件，当前支持 Markdown、JSON、YAML 和常见编程语言源码。
 
 长期产品定位、设计原则与功能准入标准见 `docs/PRODUCT_DESIGN.md`。涉及产品范围或用户体验的决策应以该文档为基线。
 
@@ -9,16 +9,17 @@
 - 使用 Swift 和 SwiftUI，主目标为 macOS。
 - 使用原生 Quick Look Preview Extension 接入 Finder 的空格预览。
 - 第一版不引入 `WKWebView` 或 Electron；保持扩展轻量、快速、可靠。
-- Markdown 使用原生阅读视图，并原生渲染常用 Mermaid、LaTeX 数学公式与常见代码语言高亮；JSON 使用保真格式化源码；YAML 使用原文高亮。
-- Markdown、JSON、YAML 分别作为独立 Quick Look 扩展，由 macOS 负责启停。
-- Containing App 提供扩展说明、系统管理入口，以及 Markdown、JSON、YAML 各自的透明背景开关；除此之外不扩展为通用设置中心。
-- App 与三个扩展通过 `group.com.lixinlv.PreAnything` App Group 共享这一项外观偏好。
+- Markdown 使用原生阅读视图，并原生渲染常用 Mermaid、LaTeX 数学公式与常见代码语言高亮；JSON 使用保真格式化源码；YAML 使用原文高亮；Source Code 保留原文并提供原生高亮、行号和横向滚动。
+- Markdown、JSON、YAML 和 Source Code 分别作为独立 Quick Look 扩展，由 macOS 负责启停；不同编程语言统一归入一个 Source Code 扩展，避免系统设置中出现大量开关。
+- Containing App 提供扩展说明、系统管理入口，以及四类预览各自的透明背景开关；除此之外不扩展为通用设置中心。
+- App 与四个扩展通过 `group.com.lixinlv.PreAnything` App Group 共享这一项外观偏好。
 
 ## 产品边界（MVP）
 
 - `.md` / `.markdown`：固定渲染为原生阅读视图。
 - `.json`：保留键顺序、重复键和数字写法的格式化、语法着色与解析错误提示。
 - `.yaml` / `.yml`：不改写原文的语法着色与解析错误提示。
+- 常见源码：保留全部文本，提供有界的原生词法高亮、行号、选择复制与长行横向滚动；不得执行或编译源码。
 - 自动适配浅色与深色模式，并对超大文件安全降级。
 
 ## 实现约定

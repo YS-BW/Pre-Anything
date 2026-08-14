@@ -6,7 +6,8 @@ enum SourceHighlighter {
         source: String,
         byteCount: Int,
         diagnostic: PreviewDiagnostic? = nil,
-        isLimited: Bool = false
+        isLimited: Bool = false,
+        sourceLanguage: SourceLanguage? = nil
     ) -> PreviewDocument {
         let spans: [PreviewStyleSpan]
         switch format {
@@ -16,6 +17,11 @@ enum SourceHighlighter {
             spans = YAMLSourceHighlighter.highlight(source)
         case .markdown:
             spans = []
+        case .sourceCode:
+            spans = NativeCodeHighlighter.spans(
+                source: source,
+                language: (sourceLanguage ?? .plainText).rawValue
+            )
         }
 
         return PreviewDocument(

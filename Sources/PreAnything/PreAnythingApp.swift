@@ -5,7 +5,7 @@ struct PreAnythingApp: App {
     var body: some Scene {
         WindowGroup {
             ExtensionManagerView()
-                .frame(minWidth: 520, minHeight: 420)
+                .frame(minWidth: 520, minHeight: 500)
         }
         .windowResizability(.contentMinSize)
     }

@@ -69,9 +69,30 @@ targets:
         CFBundleDisplayName: Pre-Anything
         CFBundleName: Pre-Anything
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "10"
+        CFBundleVersion: "12"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.lixinlv.preanything.source-code
+            UTTypeDescription: Pre-Anything Source Code
+            UTTypeConformsTo:
+              - public.source-code
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - jsx
+                - mjs
+                - cjs
+                - ts
+                - tsx
+                - mts
+                - cts
+                - go
+                - rs
+                - kt
+                - kts
+                - cs
+                - pyi
+                - pyw
     entitlements:
       path: Sources/PreAnything/PreAnything.entitlements
       properties:
@@ -96,6 +117,9 @@ targets:
       - target: YAMLPreview
         embed: true
         codeSign: true
+      - target: SourceCodePreview
+        embed: true
+        codeSign: true
 
   MarkdownPreview:
     templates: [QuickLookExtension]
@@ -110,7 +134,7 @@ targets:
       properties:
         CFBundleDisplayName: Markdown Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "10"
+        CFBundleVersion: "12"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -140,7 +164,7 @@ targets:
       properties:
         CFBundleDisplayName: JSON Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "10"
+        CFBundleVersion: "12"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -163,13 +187,58 @@ targets:
       properties:
         CFBundleDisplayName: YAML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "10"
+        CFBundleVersion: "12"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
           NSExtensionAttributes:
             QLSupportedContentTypes:
               - public.yaml
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+
+  SourceCodePreview:
+    templates: [QuickLookExtension]
+    sources:
+      - Sources/SourceCodePreview
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lixinlv.PreAnything.SourceCodePreview
+        PRODUCT_NAME: Source Code Preview
+    info:
+      path: Sources/SourceCodePreview/Info.plist
+      properties:
+        CFBundleDisplayName: Source Code Preview
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "12"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLSupportedContentTypes:
+              # Quick Look does not consistently route concrete language UTIs
+              # through the public.source-code parent on macOS 27. Register the
+              # system language types explicitly so the extension wins over the
+              # built-in public.plain-text preview.
+              - public.swift-source
+              - public.objective-c-source
+              - public.objective-c-plus-plus-source
+              - public.c-source
+              - public.c-header
+              - public.c-plus-plus-source
+              - public.c-plus-plus-header
+              - com.sun.java-source
+              - com.netscape.javascript-source
+              - com.microsoft.typescript
+              - public.python-script
+              - public.ruby-script
+              - public.shell-script
+              - public.bash-script
+              - public.zsh-script
+              - org.iso.sql
+              - public.css
+              - com.lixinlv.preanything.source-code
+              - public.source-code
             QLSupportsSearchableItems: false
             QLIsDataBasedPreview: false
 

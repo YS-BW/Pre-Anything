@@ -4,6 +4,7 @@ public enum PreviewFormat: String, CaseIterable, Sendable {
     case markdown
     case json
     case yaml
+    case sourceCode
 }
 
 public enum HierarchyTokenStyle: Sendable, Equatable {
@@ -41,6 +42,10 @@ public enum PreviewStyleRole: Sendable, Equatable {
     case null
     case comment
     case keyword
+    case type
+    case function
+    case attribute
+    case preprocessor
     case punctuation
     case hierarchy(level: Int, style: HierarchyTokenStyle)
 }

@@ -19,6 +19,7 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertTrue(preferences.isTransparent(for: .markdown))
         XCTAssertFalse(preferences.isTransparent(for: .json))
         XCTAssertTrue(preferences.isTransparent(for: .yaml))
+        XCTAssertTrue(preferences.isTransparent(for: .sourceCode))
     }
 
     func testJSONPreservesOrderDuplicatesAndNumberSpelling() throws {
@@ -334,6 +335,111 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertEqual(document.diagnostic?.severity, .warning)
     }
 
+    func testSourceLanguageDetectionCoversSupportedFamilies() {
+        let cases: [(String, SourceLanguage)] = [
+            ("swift", .swift), ("m", .objectiveC), ("hpp", .cpp),
+            ("cs", .csharp), ("java", .java), ("jsx", .javascript),
+            ("tsx", .typescript), ("kt", .kotlin), ("go", .go),
+            ("rs", .rust), ("py", .python), ("rb", .ruby),
+            ("zsh", .shell), ("sql", .sql), ("css", .css),
+        ]
+
+        for (pathExtension, expected) in cases {
+            XCTAssertEqual(
+                SourceLanguage.language(forPathExtension: pathExtension.uppercased()),
+                expected
+            )
+        }
+        XCTAssertEqual(SourceLanguage.language(forPathExtension: "unknown"), .plainText)
+    }
+
+    func testPythonSourceRemainsUnmodifiedAndHighlightsCoreTokens() throws {
+        let source = #"""
+        @dataclass(slots=True)
+        class PreviewJob:
+            retries: int = 3
+
+            async def render(self, name: str) -> str:
+                # The extension reads source; it never executes it.
+                return f"Hello, {name}"
+        """#
+        let document = try prepare(source, format: .sourceCode, pathExtension: "py")
+
+        XCTAssertEqual(document.content, source)
+        XCTAssertEqual(document.format, .sourceCode)
+        XCTAssertNil(document.diagnostic)
+        XCTAssertEqual(texts(with: .attribute, in: document), ["@dataclass"])
+        XCTAssertTrue(texts(with: .keyword, in: document).contains("async"))
+        XCTAssertTrue(texts(with: .type, in: document).contains("PreviewJob"))
+        XCTAssertTrue(texts(with: .function, in: document).contains("render"))
+        XCTAssertTrue(texts(with: .comment, in: document).contains {
+            $0.contains("never executes")
+        })
+        XCTAssertTrue(texts(with: .number, in: document).contains("3"))
+    }
+
+    func testJavaSourceHighlightsAnnotationsTypesAndFunctions() throws {
+        let source = #"""
+        @Deprecated
+        public final class PreviewService {
+            private static final int LIMIT = 256;
+
+            public String render(String source) {
+                return source.strip();
+            }
+        }
+        """#
+        let document = try prepare(source, format: .sourceCode, pathExtension: "java")
+
+        XCTAssertEqual(document.content, source)
+        XCTAssertTrue(texts(with: .attribute, in: document).contains("@Deprecated"))
+        XCTAssertTrue(texts(with: .type, in: document).contains("PreviewService"))
+        XCTAssertTrue(texts(with: .type, in: document).contains("String"))
+        XCTAssertTrue(texts(with: .function, in: document).contains("render"))
+        XCTAssertTrue(texts(with: .number, in: document).contains("256"))
+    }
+
+    func testLimitedSourceCodeStillUsesDetectedLanguage() throws {
+        let url = temporaryURL(extension: "py")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let prefix = "def preview() -> str:\n    return \"ready\"\n"
+        var payload = Data(prefix.utf8)
+        payload.append(Data(repeating: 0x20, count: PreviewLimits.fullPreviewBytes + 1))
+        try payload.write(to: url)
+
+        let document = PreviewService.prepareSynchronously(url: url, as: .sourceCode)
+
+        XCTAssertTrue(document.isLimited)
+        XCTAssertEqual(document.diagnostic?.severity, .warning)
+        XCTAssertTrue(texts(with: .keyword, in: document).contains("def"))
+        XCTAssertTrue(texts(with: .function, in: document).contains("preview"))
+    }
+
+    func testSourceExtensionRegistersConcreteLanguageTypes() throws {
+        let repositoryRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let infoURL = repositoryRoot
+            .appendingPathComponent("Sources/SourceCodePreview/Info.plist")
+        let data = try Data(contentsOf: infoURL)
+        let root = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        )
+        let extensionInfo = try XCTUnwrap(root["NSExtension"] as? [String: Any])
+        let attributes = try XCTUnwrap(
+            extensionInfo["NSExtensionAttributes"] as? [String: Any]
+        )
+        let supportedTypes = Set(try XCTUnwrap(
+            attributes["QLSupportedContentTypes"] as? [String]
+        ))
+
+        XCTAssertTrue(supportedTypes.contains("public.python-script"))
+        XCTAssertTrue(supportedTypes.contains("com.sun.java-source"))
+        XCTAssertTrue(supportedTypes.contains("public.swift-source"))
+        XCTAssertTrue(supportedTypes.contains("com.lixinlv.preanything.source-code"))
+    }
+
     func testOneMiBJSONPerformanceBaseline() throws {
         let record = #"{"id":9007199254740993,"name":"preview","active":true}"#
         let count = max(1, (1_024 * 1_024) / (record.utf8.count + 1))
@@ -350,11 +456,26 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertLessThan(elapsed, .seconds(2), "Debug safety ceiling exceeded; release target remains 300 ms.")
     }
 
-    private func prepare(_ source: String, format: PreviewFormat) throws -> PreviewDocument {
-        let url = temporaryURL(extension: format.rawValue)
+    private func prepare(
+        _ source: String,
+        format: PreviewFormat,
+        pathExtension: String? = nil
+    ) throws -> PreviewDocument {
+        let url = temporaryURL(extension: pathExtension ?? format.rawValue)
         defer { try? FileManager.default.removeItem(at: url) }
         try Data(source.utf8).write(to: url)
         return PreviewService.prepareSynchronously(url: url, as: format)
+    }
+
+    private func texts(
+        with role: PreviewStyleRole,
+        in document: PreviewDocument
+    ) -> [String] {
+        let content = document.content as NSString
+        return document.spans.compactMap { span in
+            guard span.role == role else { return nil }
+            return content.substring(with: NSRange(location: span.location, length: span.length))
+        }
     }
 
     private func temporaryURL(extension pathExtension: String) -> URL {

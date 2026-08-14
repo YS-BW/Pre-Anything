@@ -15,6 +15,10 @@ final class AppearanceSettings: ObservableObject {
         didSet { preferences.setTransparent(yamlTransparent, for: .yaml) }
     }
 
+    @Published var sourceCodeTransparent: Bool {
+        didSet { preferences.setTransparent(sourceCodeTransparent, for: .sourceCode) }
+    }
+
     private let preferences: PreviewAppearancePreferences
 
     init(preferences: PreviewAppearancePreferences = .shared) {
@@ -22,15 +26,17 @@ final class AppearanceSettings: ObservableObject {
         markdownTransparent = preferences.isTransparent(for: .markdown)
         jsonTransparent = preferences.isTransparent(for: .json)
         yamlTransparent = preferences.isTransparent(for: .yaml)
+        sourceCodeTransparent = preferences.isTransparent(for: .sourceCode)
     }
 
     var allTransparent: Bool {
-        markdownTransparent && jsonTransparent && yamlTransparent
+        markdownTransparent && jsonTransparent && yamlTransparent && sourceCodeTransparent
     }
 
     func setAllTransparent(_ isTransparent: Bool) {
         markdownTransparent = isTransparent
         jsonTransparent = isTransparent
         yamlTransparent = isTransparent
+        sourceCodeTransparent = isTransparent
     }
 }

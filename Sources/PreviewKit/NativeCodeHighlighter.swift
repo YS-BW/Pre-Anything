@@ -15,10 +15,16 @@ enum NativeCodeHighlighter {
         var occupied: [NSRange] = []
         var spans: [PreviewStyleSpan] = []
 
-        func addMatches(_ pattern: String, role: PreviewStyleRole, options: NSRegularExpression.Options = []) {
+        func addMatches(
+            _ pattern: String,
+            role: PreviewStyleRole,
+            options: NSRegularExpression.Options = [],
+            captureGroup: Int = 0
+        ) {
             guard let expression = try? NSRegularExpression(pattern: pattern, options: options) else { return }
             for match in expression.matches(in: source, range: fullRange) {
-                let range = match.range
+                guard captureGroup < match.numberOfRanges else { continue }
+                let range = match.range(at: captureGroup)
                 guard range.length > 0, !occupied.contains(where: { NSIntersectionRange($0, range).length > 0 }) else {
                     continue
                 }
@@ -37,6 +43,17 @@ enum NativeCodeHighlighter {
 
         addMatches(#"(?<![\p{L}\p{N}_])(?:0[xX][0-9A-Fa-f](?:_?[0-9A-Fa-f])*|0[bB][01](?:_?[01])*|(?:\d(?:_?\d)*)?(?:\.\d(?:_?\d)*)|\d(?:_?\d)*(?:[eE][+-]?\d(?:_?\d)*)?)(?![\p{L}\p{N}_])"#, role: .number)
 
+        switch language {
+        case "c", "cpp", "objective-c", "csharp":
+            addMatches(#"(?m)^[\t ]*#[\t ]*[A-Za-z_][A-Za-z0-9_]*"#, role: .preprocessor)
+        case "swift", "java", "kotlin", "python":
+            addMatches(#"(?m)(?<![\p{L}\p{N}_])@[A-Za-z_][A-Za-z0-9_.]*"#, role: .attribute)
+        case "rust":
+            addMatches(#"#\!?\[[^\]\r\n]+\]"#, role: .attribute)
+        default:
+            break
+        }
+
         if !profile.keywords.isEmpty {
             let words = profile.keywords
                 .sorted { $0.count > $1.count }
@@ -48,6 +65,29 @@ enum NativeCodeHighlighter {
                 options: [.caseInsensitive]
             )
         }
+
+        let types = typeNames(for: language)
+        if !types.isEmpty {
+            let words = types
+                .sorted { $0.count > $1.count }
+                .map(NSRegularExpression.escapedPattern(for:))
+                .joined(separator: "|")
+            addMatches(
+                #"(?<![\p{L}\p{N}_])(?:"# + words + #")(?![\p{L}\p{N}_])"#,
+                role: .type
+            )
+        }
+
+        addMatches(
+            #"(?<![\p{L}\p{N}_])(?:class|struct|enum|protocol|interface|trait|record|typealias|type)[\t ]+([A-Za-z_][A-Za-z0-9_]*)"#,
+            role: .type,
+            captureGroup: 1
+        )
+        addMatches(
+            #"(?<![.\p{L}\p{N}_])([A-Za-z_][A-Za-z0-9_]*)[\t ]*(?=\()"#,
+            role: .function,
+            captureGroup: 1
+        )
 
         if profile.highlightsMarkupTags {
             addMatches(#"</?[A-Za-z][^>]*?>"#, role: .keyword)
@@ -69,6 +109,29 @@ enum NativeCodeHighlighter {
             "md": "markdown", "rs": "rust", "kt": "kotlin", "golang": "go",
         ]
         return aliases[value] ?? value
+    }
+
+    private static func typeNames(for language: String) -> Set<String> {
+        switch language {
+        case "swift":
+            ["Any", "AnyObject", "Bool", "Character", "Double", "Float", "Int", "Never", "Self", "String", "UInt", "Void"]
+        case "c", "cpp", "objective-c":
+            ["bool", "char", "double", "float", "id", "int", "long", "short", "signed", "size_t", "unsigned", "void", "wchar_t"]
+        case "java", "kotlin":
+            ["boolean", "byte", "char", "double", "float", "int", "long", "short", "String", "Unit", "void"]
+        case "csharp":
+            ["bool", "byte", "char", "decimal", "double", "float", "int", "long", "object", "sbyte", "short", "string", "uint", "ulong", "ushort"]
+        case "javascript", "typescript":
+            ["any", "bigint", "boolean", "never", "number", "object", "string", "symbol", "unknown", "void"]
+        case "python":
+            ["bool", "bytes", "dict", "float", "frozenset", "int", "list", "object", "set", "str", "tuple"]
+        case "go":
+            ["bool", "byte", "complex64", "complex128", "error", "float32", "float64", "int", "int8", "int16", "int32", "int64", "rune", "string", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr"]
+        case "rust":
+            ["bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "str", "u8", "u16", "u32", "u64", "u128", "usize"]
+        default:
+            []
+        }
     }
 }
 

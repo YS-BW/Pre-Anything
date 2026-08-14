@@ -10,6 +10,7 @@ open class BasePreviewViewController: NSViewController, QLPreviewingController {
     private let previewView = NativePreviewView()
 
     open override func loadView() {
+        previewView.configure(for: previewFormat)
         previewView.setBackgroundTransparent(
             PreviewAppearancePreferences.shared.isTransparent(for: previewFormat)
         )
@@ -41,6 +42,7 @@ private final class NativePreviewView: NSView {
     private let diagnosticLabel = NSTextField(wrappingLabelWithString: "")
     private let scrollView = NSScrollView()
     private let textView = NSTextView()
+    private var lineNumberRuler: LineNumberRulerView?
     private var isBackgroundTransparent = true
 
     override init(frame frameRect: NSRect) {
@@ -50,6 +52,27 @@ private final class NativePreviewView: NSView {
 
     required init?(coder: NSCoder) {
         nil
+    }
+
+    func configure(for format: PreviewFormat) {
+        guard format == .sourceCode, lineNumberRuler == nil else { return }
+
+        textView.isHorizontallyResizable = true
+        textView.maxSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        textView.textContainer?.containerSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        textView.textContainer?.widthTracksTextView = false
+
+        let ruler = LineNumberRulerView(scrollView: scrollView, textView: textView)
+        lineNumberRuler = ruler
+        scrollView.hasVerticalRuler = true
+        scrollView.rulersVisible = true
+        scrollView.verticalRulerView = ruler
     }
 
     func setBackgroundTransparent(_ isTransparent: Bool) {
@@ -63,6 +86,7 @@ private final class NativePreviewView: NSView {
         scrollView.contentView.backgroundColor = backgroundColor
         textView.drawsBackground = !isTransparent
         textView.backgroundColor = backgroundColor
+        lineNumberRuler?.isBackgroundTransparent = isTransparent
     }
 
     func render(
@@ -73,6 +97,7 @@ private final class NativePreviewView: NSView {
         finalize(attributed)
         textView.textStorage?.setAttributedString(attributed)
         textView.scrollToBeginningOfDocument(nil)
+        lineNumberRuler?.updateLineStarts(for: document.content)
 
         if let diagnostic = document.diagnostic {
             diagnosticContainer.isHidden = false
@@ -175,7 +200,9 @@ private final class NativePreviewView: NSView {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = document.format == .markdown ? 3 : 1
         paragraphStyle.paragraphSpacing = document.format == .markdown ? 7 : 0
-        paragraphStyle.lineBreakMode = .byWordWrapping
+        paragraphStyle.lineBreakMode = document.format == .sourceCode
+            ? .byClipping
+            : .byWordWrapping
 
         let attributed = NSMutableAttributedString(
             string: document.content,
@@ -300,6 +327,17 @@ private final class NativePreviewView: NSView {
         case .keyword:
             attributed.addAttributes([
                 .foregroundColor: NSColor.systemIndigo,
+                .font: NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .medium),
+            ], range: range)
+        case .type:
+            attributed.addAttribute(.foregroundColor, value: NSColor.systemTeal, range: range)
+        case .function:
+            attributed.addAttribute(.foregroundColor, value: NSColor.systemBlue, range: range)
+        case .attribute:
+            attributed.addAttribute(.foregroundColor, value: NSColor.systemOrange, range: range)
+        case .preprocessor:
+            attributed.addAttributes([
+                .foregroundColor: NSColor.systemPink,
                 .font: NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .medium),
             ], range: range)
         case .punctuation:
@@ -454,6 +492,114 @@ private final class NativePreviewView: NSView {
         }
 
         return nil
+    }
+}
+
+@MainActor
+private final class LineNumberRulerView: NSRulerView {
+    private weak var textView: NSTextView?
+    private var lineStarts: [Int] = [0]
+    var isBackgroundTransparent = true {
+        didSet { needsDisplay = true }
+    }
+
+    init(scrollView: NSScrollView, textView: NSTextView) {
+        self.textView = textView
+        super.init(scrollView: scrollView, orientation: .verticalRuler)
+        clientView = textView
+        ruleThickness = 52
+    }
+
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var requiredThickness: CGFloat { 52 }
+
+    func updateLineStarts(for source: String) {
+        let text = source as NSString
+        var starts = [0]
+        var index = 0
+
+        while index < text.length {
+            let character = text.character(at: index)
+            if character == 0x0A {
+                starts.append(index + 1)
+            } else if character == 0x0D,
+                      index + 1 >= text.length || text.character(at: index + 1) != 0x0A {
+                starts.append(index + 1)
+            }
+            index += 1
+        }
+
+        lineStarts = starts
+        needsDisplay = true
+    }
+
+    override func drawHashMarksAndLabels(in rect: NSRect) {
+        guard let textView,
+              let layoutManager = textView.layoutManager,
+              let textContainer = textView.textContainer else {
+            return
+        }
+
+        if !isBackgroundTransparent {
+            NSColor.textBackgroundColor.setFill()
+            rect.fill()
+        }
+
+        NSColor.separatorColor.withAlphaComponent(0.55).setStroke()
+        let separator = NSBezierPath()
+        separator.move(to: NSPoint(x: bounds.maxX - 0.5, y: rect.minY))
+        separator.line(to: NSPoint(x: bounds.maxX - 0.5, y: rect.maxY))
+        separator.stroke()
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .regular),
+            .foregroundColor: NSColor.tertiaryLabelColor,
+        ]
+        let contentLength = (textView.string as NSString).length
+
+        for (offset, characterLocation) in lineStarts.enumerated() {
+            let lineRect: NSRect
+            if characterLocation < contentLength,
+               layoutManager.numberOfGlyphs > 0 {
+                let glyph = layoutManager.glyphIndexForCharacter(at: characterLocation)
+                lineRect = layoutManager.lineFragmentRect(
+                    forGlyphAt: glyph,
+                    effectiveRange: nil,
+                    withoutAdditionalLayout: true
+                )
+            } else if let extra = layoutManager.extraLineFragmentTextContainer,
+                      extra === textContainer {
+                lineRect = layoutManager.extraLineFragmentRect
+            } else {
+                continue
+            }
+
+            let textOrigin = NSPoint(
+                x: 0,
+                y: textView.textContainerOrigin.y + lineRect.minY
+            )
+            let rulerOrigin = convert(textOrigin, from: textView)
+            let drawRect = NSRect(
+                x: 4,
+                y: rulerOrigin.y,
+                width: max(0, bounds.width - 12),
+                height: lineRect.height
+            )
+            guard drawRect.intersects(rect) else { continue }
+
+            let number = "\(offset + 1)" as NSString
+            let size = number.size(withAttributes: attributes)
+            number.draw(
+                at: NSPoint(
+                    x: drawRect.maxX - size.width,
+                    y: drawRect.minY + max(0, (drawRect.height - size.height) / 2)
+                ),
+                withAttributes: attributes
+            )
+        }
     }
 }
 

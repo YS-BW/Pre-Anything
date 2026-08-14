@@ -22,6 +22,12 @@ struct ExtensionManagerView: View {
             name: "YAML",
             detail: "Original source with syntax highlighting"
         ),
+        FormatSummary(
+            format: .sourceCode,
+            icon: "chevron.left.forwardslash.chevron.right",
+            name: "Source Code",
+            detail: "Native highlighting with line numbers"
+        ),
     ]
 
     @StateObject private var appearanceSettings = AppearanceSettings()
@@ -108,7 +114,7 @@ struct ExtensionManagerView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Open General → Login Items & Extensions → Quick Look to manage Markdown, JSON, and YAML previews.")
+            Text("Open General → Login Items & Extensions → Quick Look to manage Markdown, JSON, YAML, and Source Code previews.")
         }
     }
 
@@ -127,6 +133,8 @@ struct ExtensionManagerView: View {
             $appearanceSettings.jsonTransparent
         case .yaml:
             $appearanceSettings.yamlTransparent
+        case .sourceCode:
+            $appearanceSettings.sourceCodeTransparent
         }
     }
 

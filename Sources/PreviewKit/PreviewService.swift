@@ -17,7 +17,10 @@ public enum PreviewService {
                     source: loaded.text,
                     byteCount: loaded.byteCount,
                     diagnostic: loaded.diagnostic,
-                    isLimited: true
+                    isLimited: true,
+                    sourceLanguage: format == .sourceCode
+                        ? SourceLanguage.detect(url: url)
+                        : nil
                 )
             }
 
@@ -36,6 +39,12 @@ public enum PreviewService {
                 return YAMLPreviewRenderer.render(
                     source: loaded.text,
                     byteCount: loaded.byteCount
+                )
+            case .sourceCode:
+                return SourceCodePreviewRenderer.render(
+                    source: loaded.text,
+                    byteCount: loaded.byteCount,
+                    language: SourceLanguage.detect(url: url)
                 )
             }
         } catch {
