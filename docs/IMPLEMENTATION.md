@@ -52,7 +52,7 @@ Validated on 2026-08-14 with macOS 27 beta, Xcode 27 beta (27A5237l), and Swift 
 - 1 MiB JSON processing baseline: approximately 0.29 seconds in the Debug test process.
 - Debug app build: succeeded with all eight preview extensions embedded and validated by Xcode.
 - Release build: succeeded using “Sign to Run Locally”.
-- Current unsigned universal Release app size is approximately 53 MiB after adding Source Code. `Markdown Preview.appex` is approximately 27 MiB; JSON, YAML, and Source Code are approximately 5.9 MiB each. Heavy Mermaid and math rendering dependencies remain confined to Markdown.
+- Alpha distribution packages are arm64-only. Universal packaging is intentionally deferred until the formal release stage. Heavy Mermaid and math rendering dependencies remain confined to Markdown.
 - Code signature deep verification: passed.
 - PlugInKit discovery is intentionally left to Finder/system-settings verification because each preview family is independently switchable.
 - Computer Use confirmed that Finder launches `Source Code Preview` for concrete `public.python-script` and `com.sun.java-source` files. Both fixtures render selectable, line-numbered, syntax-highlighted native text.

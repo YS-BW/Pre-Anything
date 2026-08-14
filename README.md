@@ -59,12 +59,12 @@ xcodebuild \
 
 For local Finder testing, build the `PreAnything` scheme normally. Xcode can use “Sign to Run Locally”; a Personal Team can be supplied in `Config/Local.xcconfig` when needed. Copy the resulting `Pre-Anything.app` into `~/Applications` or `/Applications`, then launch it once so macOS discovers its extensions.
 
-To create a GitHub development DMG, keep `Config/Local.xcconfig` configured with an Apple Development Team ID and run:
+To create an Apple-Silicon GitHub development DMG, keep `Config/Local.xcconfig` configured with an Apple Development Team ID and run:
 
 ```sh
 Scripts/package-development-dmg.sh
 ```
 
-The script verifies every nested extension remains signed and fails if a provisioning profile is embedded. It intentionally does not notarize the result.
+The script builds `arm64` only for Alpha releases, verifies every nested extension remains signed, and fails if a provisioning profile is embedded. It intentionally does not notarize the result. Universal packaging is deferred until the formal release stage.
 
 Product direction and non-negotiable behavior are documented in [docs/PRODUCT_DESIGN.md](docs/PRODUCT_DESIGN.md).

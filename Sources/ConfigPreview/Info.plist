@@ -28,6 +28,7 @@
 			<false/>
 			<key>QLSupportedContentTypes</key>
 			<array>
+				<string>public.toml</string>
 				<string>com.lixinlv.preanything.toml</string>
 				<string>com.lixinlv.preanything.jsonc</string>
 				<string>com.lixinlv.preanything.json5</string>

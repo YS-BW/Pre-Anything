@@ -1,10 +1,10 @@
 #!/bin/zsh
 set -euo pipefail
 
-# Create the free-to-distribute development build described in README.md.
-# It is Apple Development-signed, deliberately not notarized, and must not
-# contain a development provisioning profile. Do not use this script for a
-# Developer ID release.
+# Create the Apple-Silicon development build described in README.md. It is
+# Apple Development-signed, deliberately not notarized, and must not contain a
+# development provisioning profile. Universal packaging is deferred until the
+# project is ready for a Developer ID release.
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 derived_data="$(mktemp -d "$root/build/pre-anything-development-derived.XXXXXX")"
@@ -12,7 +12,7 @@ products="$derived_data/Build/Products/Release"
 app="$products/Pre-Anything.app"
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$root/Sources/PreAnything/Info.plist")"
 stage="$(mktemp -d "$root/build/pre-anything-development-dmg.XXXXXX")"
-dmg="$root/build/Pre-Anything-${version}-development-universal.dmg"
+dmg="$root/build/Pre-Anything-${version}-development-arm64.dmg"
 lsregister='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
 
 cleanup() {
@@ -36,8 +36,8 @@ xcodebuild \
     -configuration Release \
     -destination 'generic/platform=macOS' \
     -derivedDataPath "$derived_data" \
-    ONLY_ACTIVE_ARCH=NO \
-    ARCHS='arm64 x86_64' \
+    ONLY_ACTIVE_ARCH=YES \
+    ARCHS='arm64' \
     build
 
 if [[ ! -d "$app" ]]; then
@@ -64,7 +64,7 @@ fi
 /usr/bin/ditto "$app" "$stage/Pre-Anything.app"
 /bin/ln -s /Applications "$stage/Applications"
 /usr/bin/hdiutil create \
-    -volname "Pre-Anything ${version} Development" \
+    -volname "Pre-Anything ${version} Development arm64" \
     -srcfolder "$stage" \
     -ov \
     -format UDZO \

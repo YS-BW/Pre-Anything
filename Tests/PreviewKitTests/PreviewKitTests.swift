@@ -601,7 +601,7 @@ final class PreviewKitTests: XCTestCase {
     func testNewExtensionTargetsRegisterExpectedUTIs() throws {
         let expected: [String: Set<String>] = [
             "ConfigPreview": [
-                "com.lixinlv.preanything.toml", "com.lixinlv.preanything.jsonc",
+                "public.toml", "com.lixinlv.preanything.toml", "com.lixinlv.preanything.jsonc",
                 "com.lixinlv.preanything.json5", "com.lixinlv.preanything.dotenv",
                 "com.lixinlv.preanything.ini", "com.lixinlv.preanything.properties",
             ],
