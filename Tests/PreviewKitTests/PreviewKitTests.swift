@@ -618,7 +618,9 @@ final class PreviewKitTests: XCTestCase {
                 "com.lixinlv.preanything.json5", "com.lixinlv.preanything.dotenv",
                 "com.lixinlv.preanything.ini", "com.lixinlv.preanything.properties",
             ],
-            "TablePreview": ["public.comma-separated-values-text", "public.tab-separated-values-text"],
+            "TablePreview": [
+                "com.lixinlv.preanything.tsv", "public.tab-separated-values-text",
+            ],
             "XMLPreview": ["public.xml"],
             "NotebookPreview": ["com.lixinlv.preanything.notebook"],
         ]

@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
-	<string>16</string>
+	<string>22</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
@@ -28,7 +28,7 @@
 			<false/>
 			<key>QLSupportedContentTypes</key>
 			<array>
-				<string>public.comma-separated-values-text</string>
+				<string>com.lixinlv.preanything.tsv</string>
 				<string>public.tab-separated-values-text</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>

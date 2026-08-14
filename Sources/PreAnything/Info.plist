@@ -6,6 +6,123 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Pre-Anything</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>jsonc</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>JSON with Comments</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.jsonc</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>json5</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>JSON5</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.json5</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>env</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Environment Configuration</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.dotenv</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ini</string>
+				<string>cfg</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>INI Configuration</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.ini</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>properties</string>
+				<string>conf</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Properties Configuration</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.properties</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ipynb</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Jupyter Notebook</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.notebook</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>tsv</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Tab-Separated Values</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.lixinlv.preanything.tsv</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -19,7 +136,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
-	<string>16</string>
+	<string>22</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>NSHumanReadableCopyright</key>
@@ -58,35 +175,17 @@
 				</array>
 			</dict>
 		</dict>
-	</array>
-	<key>UTImportedTypeDeclarations</key>
-	<array>
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>TOML Configuration</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.lixinlv.preanything.toml</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>toml</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>JSON with Comments</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.jsonc</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -98,12 +197,14 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>JSON5</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.json5</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -115,12 +216,14 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Environment Configuration</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.dotenv</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -132,12 +235,14 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>INI Configuration</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.ini</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -150,12 +255,14 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Properties Configuration</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.properties</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -168,18 +275,38 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.json</string>
-				<string>public.text</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Jupyter Notebook</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.lixinlv.preanything.notebook</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
 					<string>ipynb</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Tab-Separated Values</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.lixinlv.preanything.tsv</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://github.com/YS-BW/Pre-Anything</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tsv</string>
 				</array>
 			</dict>
 		</dict>

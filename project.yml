@@ -72,10 +72,50 @@ targets:
         CFBundleDisplayName: Pre-Anything
         CFBundleName: Pre-Anything
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        # Register product-owned text formats as viewer documents as well as
+        # exporting their UTIs. On current macOS builds, this is required for
+        # LaunchServices to associate an extension-only custom type with the
+        # containing app's Quick Look provider.
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: JSON with Comments
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [jsonc]
+            LSItemContentTypes: [com.lixinlv.preanything.jsonc]
+          - CFBundleTypeName: JSON5
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [json5]
+            LSItemContentTypes: [com.lixinlv.preanything.json5]
+          - CFBundleTypeName: Environment Configuration
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [env]
+            LSItemContentTypes: [com.lixinlv.preanything.dotenv]
+          - CFBundleTypeName: INI Configuration
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [ini, cfg]
+            LSItemContentTypes: [com.lixinlv.preanything.ini]
+          - CFBundleTypeName: Properties Configuration
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [properties, conf]
+            LSItemContentTypes: [com.lixinlv.preanything.properties]
+          - CFBundleTypeName: Jupyter Notebook
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [ipynb]
+            LSItemContentTypes: [com.lixinlv.preanything.notebook]
+          - CFBundleTypeName: Tab-Separated Values
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            CFBundleTypeExtensions: [tsv]
+            LSItemContentTypes: [com.lixinlv.preanything.tsv]
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.lixinlv.preanything.source-code
             UTTypeDescription: Pre-Anything Source Code
@@ -97,42 +137,51 @@ targets:
                 - cs
                 - pyi
                 - pyw
-        UTImportedTypeDeclarations:
-          - UTTypeIdentifier: com.lixinlv.preanything.toml
-            UTTypeDescription: TOML Configuration
-            UTTypeConformsTo: [public.text]
-            UTTypeTagSpecification:
-              public.filename-extension: [toml]
+          # These are product-owned document types, rather than imported
+          # aliases. Exporting them makes LaunchServices route their exact UTI
+          # to the matching Quick Look extension.
           - UTTypeIdentifier: com.lixinlv.preanything.jsonc
             UTTypeDescription: JSON with Comments
-            UTTypeConformsTo: [public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [jsonc]
           - UTTypeIdentifier: com.lixinlv.preanything.json5
             UTTypeDescription: JSON5
-            UTTypeConformsTo: [public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [json5]
           - UTTypeIdentifier: com.lixinlv.preanything.dotenv
             UTTypeDescription: Environment Configuration
-            UTTypeConformsTo: [public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [env]
           - UTTypeIdentifier: com.lixinlv.preanything.ini
             UTTypeDescription: INI Configuration
-            UTTypeConformsTo: [public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [ini, cfg]
           - UTTypeIdentifier: com.lixinlv.preanything.properties
             UTTypeDescription: Properties Configuration
-            UTTypeConformsTo: [public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [properties, conf]
           - UTTypeIdentifier: com.lixinlv.preanything.notebook
             UTTypeDescription: Jupyter Notebook
-            UTTypeConformsTo: [public.json, public.text]
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
             UTTypeTagSpecification:
               public.filename-extension: [ipynb]
+          - UTTypeIdentifier: com.lixinlv.preanything.tsv
+            UTTypeDescription: Tab-Separated Values
+            UTTypeReferenceURL: https://github.com/YS-BW/Pre-Anything
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [tsv]
     entitlements:
       path: Sources/PreAnything/PreAnything.entitlements
       properties:
@@ -186,7 +235,7 @@ targets:
       properties:
         CFBundleDisplayName: Markdown Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -217,7 +266,7 @@ targets:
       properties:
         CFBundleDisplayName: JSON Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -241,7 +290,7 @@ targets:
       properties:
         CFBundleDisplayName: YAML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -265,7 +314,7 @@ targets:
       properties:
         CFBundleDisplayName: Source Code Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -311,8 +360,26 @@ targets:
       properties:
         CFBundleDisplayName: Config Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        # Mirror custom UTI declarations in the provider bundle so they are
+        # known while Quick Look registers this extension on a clean Mac.
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.lixinlv.preanything.jsonc
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [jsonc]}
+          - UTTypeIdentifier: com.lixinlv.preanything.json5
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [json5]}
+          - UTTypeIdentifier: com.lixinlv.preanything.dotenv
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [env]}
+          - UTTypeIdentifier: com.lixinlv.preanything.ini
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [ini, cfg]}
+          - UTTypeIdentifier: com.lixinlv.preanything.properties
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [properties, conf]}
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
@@ -345,14 +412,14 @@ targets:
       properties:
         CFBundleDisplayName: Table Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
           NSExtensionAttributes:
             QLSupportedContentTypes:
-              - public.comma-separated-values-text
+              - com.lixinlv.preanything.tsv
               - public.tab-separated-values-text
             QLSupportsSearchableItems: false
             QLIsDataBasedPreview: false
@@ -370,7 +437,7 @@ targets:
       properties:
         CFBundleDisplayName: XML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -393,8 +460,12 @@ targets:
       properties:
         CFBundleDisplayName: Notebook Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "22"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.lixinlv.preanything.notebook
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {public.filename-extension: [ipynb]}
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController

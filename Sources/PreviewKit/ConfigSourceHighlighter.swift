@@ -31,58 +31,71 @@ public enum ConfigSourceHighlighter {
         var spans: [PreviewStyleSpan] = []
         var start = 0
         var level = 0
+        let commentMarkers = Set(comments.compactMap { $0.unicodeScalars.first?.value }.map(unichar.init))
 
         while start < text.length {
             let range = text.lineRange(for: NSRange(location: start, length: 0))
-            let line = text.substring(with: range)
-            let body = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            let bodyOffset = range.location + (line as NSString).range(of: body).location
+            let lineStart = range.location
+            let lineEnd = NSMaxRange(range)
+            var contentEnd = lineEnd
+            while contentEnd > lineStart {
+                let character = text.character(at: contentEnd - 1)
+                guard character == 0x0A || character == 0x0D else { break }
+                contentEnd -= 1
+            }
 
-            if body.hasPrefix("[") && body.hasSuffix("]") {
-                let nameRange = NSRange(location: bodyOffset, length: (body as NSString).length)
-                spans.append(PreviewStyleSpan(location: nameRange.location, length: nameRange.length, role: .hierarchy(level: level, style: .delimiter)))
-                let path = body.dropFirst().dropLast().split(separator: ".")
-                level = max(0, path.count - 1)
-            } else if !body.isEmpty, let first = body.first, !comments.contains(first) {
-                let nsLine = line as NSString
-                let equals = nsLine.range(of: "=")
-                let colon = nsLine.range(of: ":")
-                let separator: NSRange
-                if equals.location == NSNotFound { separator = colon }
-                else if colon.location == NSNotFound { separator = equals }
-                else { separator = equals.location < colon.location ? equals : colon }
+            var bodyStart = lineStart
+            while bodyStart < contentEnd, isHorizontalWhitespace(text.character(at: bodyStart)) {
+                bodyStart += 1
+            }
 
-                if separator.location != NSNotFound {
-                    let rawKey = nsLine.substring(with: NSRange(location: 0, length: separator.location))
-                        .trimmingCharacters(in: .whitespaces)
-                    // NSRange locations are UTF-16 offsets.  Do not derive this
-                    // from a Swift `String.Index` / character distance: those
-                    // diverge for CJK and emoji, and passing the latter to
-                    // NSString can trap inside a Quick Look extension.
-                    let keyRange = nsLine.range(of: rawKey)
-                    if !rawKey.isEmpty, keyRange.location != NSNotFound {
+            let marker = commentLocation(
+                in: text,
+                range: NSRange(location: bodyStart, length: contentEnd - bodyStart),
+                markers: commentMarkers
+            )
+            var bodyEnd = marker ?? contentEnd
+            while bodyEnd > bodyStart, isHorizontalWhitespace(text.character(at: bodyEnd - 1)) {
+                bodyEnd -= 1
+            }
+
+            if bodyStart < bodyEnd, !commentMarkers.contains(text.character(at: bodyStart)) {
+                if text.character(at: bodyStart) == 0x5B, text.character(at: bodyEnd - 1) == 0x5D {
+                    spans.append(PreviewStyleSpan(
+                        location: bodyStart,
+                        length: bodyEnd - bodyStart,
+                        role: .hierarchy(level: level, style: .delimiter)
+                    ))
+                    level = sectionDepth(in: text, range: NSRange(location: bodyStart, length: bodyEnd - bodyStart))
+                } else if let separator = firstAssignmentSeparator(in: text, from: bodyStart, to: bodyEnd) {
+                    var keyStart = bodyStart
+                    var keyEnd = separator
+                    while keyStart < keyEnd, isHorizontalWhitespace(text.character(at: keyStart)) { keyStart += 1 }
+                    while keyEnd > keyStart, isHorizontalWhitespace(text.character(at: keyEnd - 1)) { keyEnd -= 1 }
+
+                    if keyStart < keyEnd {
                         spans.append(PreviewStyleSpan(
-                            location: range.location + keyRange.location,
-                            length: rawKey.utf16.count,
+                            location: keyStart,
+                            length: keyEnd - keyStart,
                             role: .hierarchy(level: level, style: .key)
                         ))
                         spans.append(PreviewStyleSpan(
-                            location: range.location + separator.location,
-                            length: separator.length,
+                            location: separator,
+                            length: 1,
                             role: .hierarchy(level: level, style: .punctuation)
                         ))
                     }
                 }
             }
 
-            if let marker = commentLocation(in: line, markers: comments) {
+            if let marker {
                 spans.append(PreviewStyleSpan(
-                    location: range.location + marker,
-                    length: max(0, (line as NSString).length - marker),
+                    location: marker,
+                    length: max(0, contentEnd - marker),
                     role: .comment
                 ))
             }
-            start = NSMaxRange(range)
+            start = lineEnd
         }
         return spans
     }
@@ -151,17 +164,58 @@ public enum ConfigSourceHighlighter {
         return spans
     }
 
-    private static func commentLocation(in line: String, markers: [Character]) -> Int? {
-        var quoted: Character?
-        for (offset, character) in line.utf16.enumerated() {
-            let scalar = UnicodeScalar(character).map(Character.init) ?? " "
-            if scalar == "\"" || scalar == "'" {
-                quoted = quoted == scalar ? nil : (quoted ?? scalar)
-            } else if quoted == nil && markers.contains(scalar) {
-                return offset
+    private static func commentLocation(in text: NSString, range: NSRange, markers: Set<unichar>) -> Int? {
+        var quote: unichar?
+        var index = range.location
+        let end = NSMaxRange(range)
+        while index < end {
+            let character = text.character(at: index)
+            if character == 0x5C, quote != nil, index + 1 < end {
+                index += 2
+                continue
             }
+            if character == 0x22 || character == 0x27 {
+                quote = quote == character ? nil : (quote ?? character)
+            } else if quote == nil && markers.contains(character) {
+                return index
+            }
+            index += 1
         }
         return nil
+    }
+
+    private static func firstAssignmentSeparator(in text: NSString, from start: Int, to end: Int) -> Int? {
+        var quote: unichar?
+        var index = start
+        while index < end {
+            let character = text.character(at: index)
+            if character == 0x5C, quote != nil, index + 1 < end {
+                index += 2
+                continue
+            }
+            if character == 0x22 || character == 0x27 {
+                quote = quote == character ? nil : (quote ?? character)
+            } else if quote == nil && (character == 0x3D || character == 0x3A) {
+                return index
+            }
+            index += 1
+        }
+        return nil
+    }
+
+    private static func sectionDepth(in text: NSString, range: NSRange) -> Int {
+        var separators = 0
+        var index = range.location
+        let end = NSMaxRange(range)
+        while index < end {
+            if text.character(at: index) == 0x2E { separators += 1 }
+            index += 1
+        }
+        return separators
+    }
+
+    private static func isHorizontalWhitespace(_ character: unichar) -> Bool {
+        character == 0x20 || character == 0x09
     }
 
     private static func firstNonWhitespace(after index: Int, in source: NSString) -> Int {
