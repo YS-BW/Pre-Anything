@@ -72,7 +72,7 @@ targets:
         CFBundleDisplayName: Pre-Anything
         CFBundleName: Pre-Anything
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "Copyright © 2026 Pre-Anything"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
@@ -186,7 +186,7 @@ targets:
       properties:
         CFBundleDisplayName: Markdown Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -217,7 +217,7 @@ targets:
       properties:
         CFBundleDisplayName: JSON Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -241,7 +241,7 @@ targets:
       properties:
         CFBundleDisplayName: YAML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -265,7 +265,7 @@ targets:
       properties:
         CFBundleDisplayName: Source Code Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -311,7 +311,7 @@ targets:
       properties:
         CFBundleDisplayName: Config Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "14"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -345,7 +345,7 @@ targets:
       properties:
         CFBundleDisplayName: Table Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -370,7 +370,7 @@ targets:
       properties:
         CFBundleDisplayName: XML Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview
@@ -393,7 +393,7 @@ targets:
       properties:
         CFBundleDisplayName: Notebook Preview
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "15"
+        CFBundleVersion: "16"
         PreAnythingAppGroupIdentifier: $(PREANYTHING_APP_GROUP_IDENTIFIER)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.quicklook.preview

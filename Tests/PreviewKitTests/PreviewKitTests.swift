@@ -518,6 +518,19 @@ final class PreviewKitTests: XCTestCase {
         XCTAssertFalse(spans.contains { $0.role == .string || $0.role == .number })
     }
 
+    func testConfigHighlighterUsesUTF16RangesForUnicodeKeys() {
+        let source = """
+        [服务.🔒]
+        用户名 = \"星團昴\"
+        """
+        let spans = ConfigSourceHighlighter.highlight(source, kind: .toml)
+        let text = source as NSString
+        XCTAssertTrue(spans.contains { span in
+            text.substring(with: NSRange(location: span.location, length: span.length)) == "用户名"
+                && span.role == .hierarchy(level: 1, style: .key)
+        })
+    }
+
     func testTableParserHandlesQuotedNewlinesEscapesAndTruncation() throws {
         let table = try TableParser.parse(
             "name,notes,empty\nAda,\"first line\nsecond \"\"quote\"\"\",\n",

@@ -55,10 +55,14 @@ public enum ConfigSourceHighlighter {
                 if separator.location != NSNotFound {
                     let rawKey = nsLine.substring(with: NSRange(location: 0, length: separator.location))
                         .trimmingCharacters(in: .whitespaces)
-                    if !rawKey.isEmpty, let keyLocation = line.range(of: rawKey)?.lowerBound {
-                        let offset = line.distance(from: line.startIndex, to: keyLocation)
+                    // NSRange locations are UTF-16 offsets.  Do not derive this
+                    // from a Swift `String.Index` / character distance: those
+                    // diverge for CJK and emoji, and passing the latter to
+                    // NSString can trap inside a Quick Look extension.
+                    let keyRange = nsLine.range(of: rawKey)
+                    if !rawKey.isEmpty, keyRange.location != NSNotFound {
                         spans.append(PreviewStyleSpan(
-                            location: range.location + (line as NSString).substring(to: offset).utf16.count,
+                            location: range.location + keyRange.location,
                             length: rawKey.utf16.count,
                             role: .hierarchy(level: level, style: .key)
                         ))
